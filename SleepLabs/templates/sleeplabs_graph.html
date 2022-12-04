@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+        <script src="https://pagecdn.io/lib/mathjs/11.0.1/math.min.js"></script>
+    </head>
+    <body style="background: #f7f4f4;">
+        <div id="container" style="width: 90%;">
+            <canvas id="pie-chart"></canvas>
+        </div>
+
+        <script>
+            var Acx_data;
+            Acx_data = {{acxdata|safe}}
+            console.log(math.std(Acx_data))
+            var config = {
+              type: 'line',
+              plugins: [{
+                afterDraw: chart => {
+                  let ctx = chart.chart.ctx;
+                  let xAxis = chart.scales['x-axis-0'];
+                  let yAxis = chart.scales['y-axis-0'];
+                  ctx.save();
+                  ctx.textAlign = 'center';
+                  ctx.font = '12px Arial';      
+                  ctx.fillStyle = 'black';
+                  ctx.textAlign = 'left';
+                  ctx.fillText('Avg. = ' + parseInt(Acx_data.reduce((a, b) => a + b, 0) / Acx_data.length), xAxis.left + 20, yAxis.top + 255);
+                  ctx.fillText('Min. = ' + parseInt(Math.min(...Acx_data)), xAxis.left + 20, yAxis.top + 240);
+                  ctx.fillText('Max. = '+ parseInt(Math.max(...Acx_data)), xAxis.left + 20, yAxis.top + 225);
+                  ctx.fillText('SD = '+ parseInt(math.std(Acx_data)), xAxis.left + 20, yAxis.top +210);
+                  ctx.restore();
+                }
+              }],
+              data: {
+                datasets: [{
+                fill:false,
+                  data: {{acxdata|safe}},
+                  borderColor: 'rgb(0, 255, 0)',
+                  label: 'AcX'
+                },{
+                  fill:false,
+                  borderColor: '#7fb126',
+                  label: 'AcY',
+                  data: {{acydata|safe}},
+                },{
+                  fill:false,
+                  borderColor: '#4a6b0e',
+                  label: 'AcZ',
+                  data: {{aczdata|safe}},
+                },{
+                  fill:false,
+                  borderColor: '#0000FF',
+                  label: 'GyX',
+                  data: {{gyxdata|safe}},
+                },{
+                  fill:false,
+                  borderColor: '#00308F',
+                  label: 'GyY',
+                  data: {{gyydata|safe}},
+                },{
+                  fill:false,
+                  borderColor: '#007FFF',
+                  label: 'GyZ',
+                  data: {{gyzdata|safe}},
+                }
+              ],
+                labels: {{x_axis|safe}}
+              },
+              options: {
+
+              scales: {
+                xAxes: [{
+              ticks: {
+                  autoSkip: true,
+                  maxRotation: 45,
+                  fontColor: "black",
+                  maxTicksLimit: 10
+              }
+          }], 
+          yAxes: [{
+              ticks: {
+                  fontColor: "black",
+              }
+          }]
+              }
+      }
+            };
+        
+            window.onload = function() {
+              var ctx = document.getElementById('pie-chart').getContext('2d');
+              window.myPie = new Chart(ctx, config);
+            };
+        
+          </script>
+        
+    </body>
+</html>
