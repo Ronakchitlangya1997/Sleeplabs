@@ -31,7 +31,7 @@ def sleep_labs_graph(request):
     gyzdata = []
     gyxdata = []
     gyydata = []
-    queryset = SleepLab.objects.all().order_by('-timestamp')
+    queryset = SleepLab.objects.all().order_by('timestamp')
     for sleeplabsdata in queryset:
         timedate = (sleeplabsdata.timestamp)
         timedate_asia = timedate.astimezone(timezone('Asia/Kolkata'))
