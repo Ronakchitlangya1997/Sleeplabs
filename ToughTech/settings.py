@@ -44,6 +44,8 @@ INSTALLED_APPS = [
 
 CORS_ORIGIN_ALLOW_ALL = True
 
+CSRF_TRUSTED_ORIGINS = ['*']
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
