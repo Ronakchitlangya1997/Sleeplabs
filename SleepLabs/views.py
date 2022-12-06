@@ -31,6 +31,7 @@ def sleep_labs_graph(request):
     gyzdata = []
     gyxdata = []
     gyydata = []
+    full_data =[]
     queryset = SleepLab.objects.all().order_by('timestamp')
     for sleeplabsdata in queryset:
         timedate = (sleeplabsdata.timestamp)
@@ -43,6 +44,10 @@ def sleep_labs_graph(request):
         gyxdata.append(int(sleeplabsdata.GyX))
         gyydata.append(int(sleeplabsdata.GyY))
         gyzdata.append(int(sleeplabsdata.GyZ))
+        dict_data = {'x_axis': timedate_split[0], 'acxdata' : int(sleeplabsdata.AcX), 'acydata' : int(sleeplabsdata.AcY), 
+                    'aczdata' : int(sleeplabsdata.AcZ), 'gyzdata' : int(sleeplabsdata.GyZ), 'gyxdata' : int(sleeplabsdata.GyX), 
+                    'gyydata' : int(sleeplabsdata.GyY)}
+        full_data.append(dict_data) 
 
     return render(request, 'sleeplabs_graph.html', {
         'x_axis': x_axis,
@@ -51,5 +56,6 @@ def sleep_labs_graph(request):
         'aczdata' : aczdata,
         'gyzdata' : gyzdata,
         'gyxdata' : gyxdata,
-        'gyydata' : gyydata
+        'gyydata' : gyydata,
+        'sleeplabs': full_data
     })

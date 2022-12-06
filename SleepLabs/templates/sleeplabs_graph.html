@@ -3,18 +3,60 @@
     <head>
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
         <script src="https://pagecdn.io/lib/mathjs/11.0.1/math.min.js"></script>
-        <meta http-equiv="refresh" content="10">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script>
+            var sleeplabs_data;
+            sleeplabs_data = {{sleeplabs|safe}}
+            sleeplabs_data_parmanent = sleeplabs_data
+            console.log(sleeplabs_data, sleeplabs_data_parmanent)
+        </script>
+        <!-- <meta http-equiv="refresh" content="10"> -->
+        <style>
+          .dashboardLeadBtn{
+              background: #FFFFFF;
+              border: 1px solid #D0D5DD;
+              float: left;
+              color: white;
+              font-family: 'Inter', sans-serif !important;
+              font-style: normal;
+              font-weight: 500;
+              font-size: 14px;
+              line-height: 20px;
+              color: #344054;
+              width: 73px;
+              height: 40px;
+          }
+          .active{
+            color: blue;
+            } 
+            .dashboardBox{
+              float: right;
+              margin-right: 30px;
+            }
+            #pie-chart{
+              width: 1460px !important;
+            }
+        </style>
     </head>
     <body style="background: #f7f4f4;">
-        <div id="container" style="width: 90%;">
+      <div class="d-flex justify-content-between dashboardBox">
+        <div class="btn-group">
+            <button class="dashboardLeadBtn" id="todaydatebtn" style="border-radius: 8px 0px 0px 8px;" onclick="updatedashboard('today')">Today</button>
+            <button class="dashboardLeadBtn" id="yesterdaydatebtn" onclick="updatedashboard('Yesterday')">Yesterday</button>
+            <button class="dashboardLeadBtn active" id="alldatbtn" onclick="updatedashboard('alltime')" style="border-radius: 0px 8px 8px 0px;">All Time</button>
+        </div>
+      </div>
+        <div id="container" style="width: 90%; margin-left: 30px;">
             <canvas id="pie-chart"></canvas>
         </div>
 
         <script>
+          // function sleeplabgraph(){
             var Acx_data;
             Acx_data = {{acxdata|safe}}
-            console.log(math.std(Acx_data))
-            var config = {
+            console.log('sleeplabs_data_parmanent',sleeplabs_data.map(current => {return current.acxdata}))
+            var ctx_live = document.getElementById("pie-chart");
+            var myChart = new Chart(ctx_live, {
               type: 'line',
               plugins: [{
                 afterDraw: chart => {
@@ -36,7 +78,7 @@
               data: {
                 datasets: [{
                 fill:false,
-                  data: {{acxdata|safe}},
+                  data: sleeplabs_data.map(current => {return current.acxdata}),
                   borderColor: 'rgb(0, 255, 0)',
                   label: 'AcX'
                 },{
@@ -44,34 +86,34 @@
                   hidden: true,
                   borderColor: '#7fb126',
                   label: 'AcY',
-                  data: {{acydata|safe}},
+                  data: sleeplabs_data.map(current => {return current.acydata}),
                 },{
                   fill:false,
                   hidden: true,
                   borderColor: '#4a6b0e',
                   label: 'AcZ',
-                  data: {{aczdata|safe}},
+                  data: sleeplabs_data.map(current => {return current.aczdata}),
                 },{
                   fill:false,
                   hidden: true,
                   borderColor: '#0000FF',
                   label: 'GyX',
-                  data: {{gyxdata|safe}},
+                  data: sleeplabs_data.map(current => {return current.gyxdata}),
                 },{
                   fill:false,
                   hidden: true,
                   borderColor: '#00308F',
                   label: 'GyY',
-                  data: {{gyydata|safe}},
+                  data: sleeplabs_data.map(current => {return current.gyydata}),
                 },{
                   fill:false,
                   hidden: true,
                   borderColor: '#007FFF',
                   label: 'GyZ',
-                  data: {{gyzdata|safe}},
+                  data: sleeplabs_data.map(current => {return current.gyzdata}),
                 }
               ],
-                labels: {{x_axis|safe}}
+                labels: sleeplabs_data.map(current => {return current.x_axis})
               },
               options: {
 
@@ -91,14 +133,62 @@
           }]
               }
       }
-            };
+    });
         
-            window.onload = function() {
-              var ctx = document.getElementById('pie-chart').getContext('2d');
-              window.myPie = new Chart(ctx, config);
-            };
+            // window.onload = function() {
+            //   var ctx = document.getElementById('pie-chart').getContext('2d');
+            //   window.myPie = new Chart(ctx, config);
+            // };
         
           </script>
+
+<script>
+  var todaydate;
+  var sleeplabs_data;
+  var todaydatebtnelement = document.getElementById("todaydatebtn");
+  var yesterdaydatebtnelement = document.getElementById("yesterdaydatebtn");
+  var alldatbtnelement = document.getElementById("alldatbtn");
+ function updatedashboard(value){
+   // todaydate = new Date().toLocaleDateString()
+               // var sevendaysagodate = new Date()
+               // sevendaysagodate.setDate(sevendaysagodate.getDate() - 7)
+               // var thirtydaysagodate = new Date()
+               // thirtydaysagodate.setDate(thirtydaysagodate.getDate() - 30)
+               // var leadsdatadatenew = new Date(leadsdata[i]['DOB'])
+   if (value == 'today'){
+     var todaydate = new Date().toLocaleDateString()
+     sleeplabs_data = sleeplabs_data_parmanent.filter(function(value) {
+                         return (new Date(value.x_axis).toLocaleDateString()) == todaydate; });
+      todaydatebtnelement.classList.add("active");
+      yesterdaydatebtnelement.classList.remove("active");
+      alldatbtnelement.classList.remove("active");
+   }else if (value == 'Yesterday'){
+     var yesterdaydate = new Date()
+     yesterdaydate.setDate(yesterdaydate.getDate() - 1)
+     sleeplabs_data = sleeplabs_data_parmanent.filter(function(value) {
+                       return (new Date(value.x_axis).toLocaleDateString()) == yesterdaydate.toLocaleDateString(); });
+      
+      todaydatebtnelement.classList.remove("active");
+      yesterdaydatebtnelement.classList.add("active");
+      alldatbtnelement.classList.remove("active");
+   }else if (value == 'alltime'){
+     sleeplabs_data = sleeplabs_data_parmanent
+      todaydatebtnelement.classList.remove("active");
+      yesterdaydatebtnelement.classList.remove("active");
+      alldatbtnelement.classList.add("active");
+   }
+
+   myChart.data.labels = sleeplabs_data.map(current => {return current.x_axis})
+   myChart.data.datasets[0].data = sleeplabs_data.map(current => {return current.acxdata});
+   myChart.data.datasets[1].data = sleeplabs_data.map(current => {return current.acydata});
+   myChart.data.datasets[2].data = sleeplabs_data.map(current => {return current.aczdata}) ;
+   myChart.data.datasets[3].data = sleeplabs_data.map(current => {return current.gyxdata});
+   myChart.data.datasets[4].data = sleeplabs_data.map(current => {return current.gyydata});
+   myChart.data.datasets[5].data = sleeplabs_data.map(current => {return current.gyzdata});
+   myChart.update();
+ }
+</script>
+
         
     </body>
 </html>
