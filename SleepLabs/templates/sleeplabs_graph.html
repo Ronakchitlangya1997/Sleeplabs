@@ -5,8 +5,8 @@
       <!-- <link rel="icon" type="image/x-icon" s="https://nps-storage.s3.ap-south-1.amazonaws.com/images/icons8-snitch-48.png"> -->
       <link rel = "icon" href ="https://nps-storage.s3.ap-south-1.amazonaws.com/images/icons8-snitch-48.png" type = "image/x-icon">
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-        <script src="https://pagecdn.io/lib/mathjs/11.0.1/math.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script src="https://pagecdn.io/lib/mathjs/11.0.1/math.min.js"></script>
         <script>
             var sleeplabs_data;
             sleeplabs_data = {{sleeplabs|safe}}
@@ -54,6 +54,9 @@
             #pie-chart{
               width: 1460px !important;
             }
+            input:focus {
+        outline: none;
+      }
         </style>
     </head>
     <body style="background: #f7f4f4;">
@@ -61,6 +64,7 @@
         <div class="btn-group">
             <button class="dashboardLeadBtn" id="todaydatebtn" style="border-radius: 8px 0px 0px 8px;" onclick="updatedashboard('today')">Today</button>
             <button class="dashboardLeadBtn" id="yesterdaydatebtn" onclick="updatedashboard('Yesterday')">Yesterday</button>
+            <input class="dashboardLeadBtn" title="Select Date" id="dateselector" onchange="updatedashboard(this.value)" style="height: 38px; width:110px;" type="Date">
             <button class="dashboardLeadBtn active" id="alldatbtn" onclick="updatedashboard('alltime')" style="border-radius: 0px 8px 8px 0px;">All Time</button>
         </div>
       </div>
@@ -81,12 +85,12 @@
         </thead>
         <tbody id="graphinfotabletbody">
           <tr>
-            <td>7</td>
-            <td>240</td>
-            <td>5 mins</td>
-            <td>235 mins</td>
-            <td>0.021</td>
-            <td>Good</td>
+            <td>NaN</td>
+            <td>NaN</td>
+            <td>NaN</td>
+            <td>NaN</td>
+            <td>NaN</td>
+            <td>NaN</td>
           </tr>
         </tbody>
           
@@ -190,6 +194,7 @@
   var todaydatebtnelement = document.getElementById("todaydatebtn");
   var yesterdaydatebtnelement = document.getElementById("yesterdaydatebtn");
   var alldatbtnelement = document.getElementById("alldatbtn");
+  var selectdatebtnelement = document.getElementById("dateselector");
   var periodvalue;
   var Totalmins;
   var Restlessness_Period;
@@ -204,6 +209,7 @@
                // var thirtydaysagodate = new Date()
                // thirtydaysagodate.setDate(thirtydaysagodate.getDate() - 30)
                // var leadsdatadatenew = new Date(leadsdata[i]['DOB'])
+  
    if (value == 'today'){
      var todaydate = new Date().toLocaleDateString()
      sleeplabs_data = sleeplabs_data_parmanent.filter(function(value) {
@@ -211,14 +217,16 @@
       todaydatebtnelement.classList.add("active");
       yesterdaydatebtnelement.classList.remove("active");
       alldatbtnelement.classList.remove("active");
-      periodvalue = 6
-      Totalmins = '150 mins'
-      Restlessness_Period = '3 mins'
-      Tight_Sleep_Period = '147 mins'
-      Ratio = (3/147).toFixed(2)
-      Quality = 'Good'
-      Start = sleeplabs_data[0]
-      Stop = sleeplabs_data[sleeplabs_data.length -1]
+      selectdatebtnelement.style.color = 'black';
+      selectdatebtnelement.value = "";
+      // periodvalue = 6
+      // Totalmins = '150 mins'
+      // Restlessness_Period = '3 mins'
+      // Tight_Sleep_Period = '147 mins'
+      // Ratio = (3/147).toFixed(2)
+      // Quality = 'Good'
+      // Start = sleeplabs_data[0]
+      // Stop = sleeplabs_data[sleeplabs_data.length -1]
    }else if (value == 'Yesterday'){
      var yesterdaydate = new Date()
      yesterdaydate.setDate(yesterdaydate.getDate() - 1)
@@ -228,27 +236,40 @@
       todaydatebtnelement.classList.remove("active");
       yesterdaydatebtnelement.classList.add("active");
       alldatbtnelement.classList.remove("active");
-      periodvalue = 1
-      Totalmins = '90 mins'
-      Restlessness_Period = '2 mins'
-      Tight_Sleep_Period = '88 mins'
-      Ratio = (2/88).toFixed(2)
-      Quality = 'Good'
-      Start = sleeplabs_data[0]
-      Stop = sleeplabs_data[sleeplabs_data.length -1]
+      selectdatebtnelement.style.color = 'black';
+      selectdatebtnelement.value = "";
+      // periodvalue = 1
+      // Totalmins = '90 mins'
+      // Restlessness_Period = '2 mins'
+      // Tight_Sleep_Period = '88 mins'
+      // Ratio = (2/88).toFixed(2)
+      // Quality = 'Good'
+      // Start = sleeplabs_data[0]
+      // Stop = sleeplabs_data[sleeplabs_data.length -1]
    }else if (value == 'alltime'){
      sleeplabs_data = sleeplabs_data_parmanent
       todaydatebtnelement.classList.remove("active");
       yesterdaydatebtnelement.classList.remove("active");
       alldatbtnelement.classList.add("active");
-      periodvalue = 7
-      Totalmins = 240
-      Restlessness_Period = '5 mins'
-      Tight_Sleep_Period = '235 mins'
-      Ratio = (5/235).toFixed(2)
-      Quality = 'Good'
-      Start = sleeplabs_data[0]
-      Stop = sleeplabs_data[sleeplabs_data.length -1]
+      selectdatebtnelement.style.color = 'black';
+      selectdatebtnelement.value = "";
+      // periodvalue = 7
+      // Totalmins = 240
+      // Restlessness_Period = '5 mins'
+      // Tight_Sleep_Period = '235 mins'
+      // Ratio = (5/235).toFixed(2)
+      // Quality = 'Good'
+      // Start = sleeplabs_data[0]
+      // Stop = sleeplabs_data[sleeplabs_data.length -1]
+   }else{
+    console.log(value)
+    var selectdate = new Date(value).toLocaleDateString()
+    sleeplabs_data = sleeplabs_data_parmanent.filter(function(value) {
+                         return (new Date(value.x_axis).toLocaleDateString()) == selectdate; });
+      todaydatebtnelement.classList.remove("active");
+      yesterdaydatebtnelement.classList.remove("active");
+      alldatbtnelement.classList.remove("active");
+      selectdatebtnelement.style.color = 'blue';
    }
    Acx_data = sleeplabs_data.map(current => {return current.acxdata})
    myChart.data.labels = sleeplabs_data.map(current => {return current.x_axis})
@@ -259,15 +280,15 @@
    myChart.data.datasets[4].data = sleeplabs_data.map(current => {return current.gyydata});
    myChart.data.datasets[5].data = sleeplabs_data.map(current => {return current.gyzdata});
    myChart.update();
-   $("#graphinfotabletbody").empty();
-   $('#graphinfotabletbody').append('<tr">'+
-                    '<td>'+periodvalue+'</td>'+
-                    '<td>'+Totalmins+'</td>'+
-                    '<td>'+Restlessness_Period +'</td>'+
-                    '<td>'+Tight_Sleep_Period +'</td>'+
-                    '<td>'+Ratio +'</td>'+
-                    '<td>'+Quality +'</td>'+
-                    '</tr>');
+  //  $("#graphinfotabletbody").empty();
+  //  $('#graphinfotabletbody').append('<tr">'+
+  //                   '<td>'+'NaN'+</td>'+
+  //                   '<td>'+'NaN'+'</td>'+
+  //                   '<td>'+'NaN' +'</td>'+
+  //                   '<td>'+'NaN' +'</td>'+
+  //                   '<td>'+'NaN' +'</td>'+
+  //                   '<td>'+'NaN' +'</td>'+
+  //                   '</tr>');
  }
 </script>
 
