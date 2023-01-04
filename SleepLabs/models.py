@@ -10,4 +10,5 @@ class SleepLab(models.Model):
     GyX = models.CharField(max_length=100, default='None') 
     GyY = models.CharField(max_length=100, default='None') 
     GyZ = models.CharField(max_length=100, default='None')
+    OCC = models.CharField(max_length=100, default=1)
     timestamp = models.DateTimeField(auto_now_add=True)

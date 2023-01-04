@@ -15,9 +15,9 @@ def SleeplabsAPI(request):
         split_data = []
         for ele in data:
             split_data.append(ele.split('='))
-        print(split_data[0][1])
+        print(split_data)
         Sleep_Labsobject=SleepLab(AcX=split_data[0][1], AcY=split_data[1][1], AcZ=split_data[2][1],
-                                        GyX=split_data[3][1], GyY=split_data[4][1], GyZ=split_data[5][1],)
+                                        GyX=split_data[3][1], GyY=split_data[4][1], GyZ=split_data[5][1], OCC=split_data[6][1])
         Sleep_Labsobject.save()
         return HttpResponse('ok')
     return HttpResponse('Not working')
