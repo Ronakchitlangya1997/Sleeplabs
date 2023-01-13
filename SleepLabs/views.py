@@ -37,25 +37,18 @@ def sleep_labs_graph(request):
         timedate = (sleeplabsdata.timestamp)
         timedate_asia = timedate.astimezone(timezone('Asia/Kolkata'))
         timedate_split = (str(timedate_asia)).split('.')
-        x_axis.append(timedate_split[0])
-        acxdata.append(int(sleeplabsdata.AcX))
-        acydata.append(int(sleeplabsdata.AcY))
-        aczdata.append(int(sleeplabsdata.AcZ))
-        gyxdata.append(int(sleeplabsdata.GyX))
-        gyydata.append(int(sleeplabsdata.GyY))
-        gyzdata.append(int(sleeplabsdata.GyZ))
+        # x_axis.append(timedate_split[0])
+        # acxdata.append(int(sleeplabsdata.AcX))
+        # acydata.append(int(sleeplabsdata.AcY))
+        # aczdata.append(int(sleeplabsdata.AcZ))
+        # gyxdata.append(int(sleeplabsdata.GyX))
+        # gyydata.append(int(sleeplabsdata.GyY))
+        # gyzdata.append(int(sleeplabsdata.GyZ))
         dict_data = {'x_axis': timedate_split[0], 'acxdata' : int(sleeplabsdata.AcX), 'acydata' : int(sleeplabsdata.AcY), 
                     'aczdata' : int(sleeplabsdata.AcZ), 'gyzdata' : int(sleeplabsdata.GyZ), 'gyxdata' : int(sleeplabsdata.GyX), 
-                    'gyydata' : int(sleeplabsdata.GyY)}
+                    'gyydata' : int(sleeplabsdata.GyY), 'occdata': int(sleeplabsdata.OCC)}
         full_data.append(dict_data) 
 
     return render(request, 'sleeplabs_graph.html', {
-        'x_axis': x_axis,
-        'acxdata' : acxdata,
-        'acydata' : acydata,
-        'aczdata' : aczdata,
-        'gyzdata' : gyzdata,
-        'gyxdata' : gyxdata,
-        'gyydata' : gyydata,
         'sleeplabs': full_data
     })

@@ -80,9 +80,9 @@
 
 
 
-        <!-- <div id="container" style="width: 90%; margin-left: 30px;">
+        <div id="container" style="width: 90%; margin-left: 30px;">
             <canvas id="pie-chart"></canvas>
-        </div> -->
+        </div>
 
         <!-- <table id="graphinfotable" style="margin-top: 40px;">
           <thead>
@@ -175,6 +175,13 @@
                   borderColor: '#ffdc79',
                   label: 'GyZ',
                   data: sleeplabs_data.map(current => {return current.gyzdata}),
+                },{
+                  fill:false,
+                  hidden: true,
+                  //borderColor: '#007FFF',
+                  borderColor: '#FFA500',
+                  label: 'OCC',
+                  data: sleeplabs_data.map(current => {return current.occdata}),
                 }
               ],
                 labels: sleeplabs_data.map(current => {return current.x_axis})
