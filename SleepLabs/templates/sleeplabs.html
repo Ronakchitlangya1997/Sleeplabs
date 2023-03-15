@@ -1,0 +1,317 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+table {
+	font-family: arial, sans-serif;
+	border-collapse: collapse;
+	font-size: 22px;
+	margin-right: auto;
+	margin-left: auto;
+	table-layout: fixed;
+    width: 45%;
+	background-color:#e4b301;
+}
+
+/* th{
+	background: #f5be00;
+    color: white;
+}
+
+td, th {
+  border: 3px solid #ffffff;
+  text-align: center!important;
+  padding: 8px!important;
+}
+
+tr:nth-child(even) {
+  background-color: #f7e7ce;
+}
+
+tr:nth-child(odd) {
+  background-color: #f5f5dc;
+} */
+
+.Dashboarddata{
+        background-color: white;
+        flex-grow: 4;
+    }
+    .Dashboarddatabox{
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    .dashboardleadsinfobox{
+        width: 250px;
+        height: 181px;
+        background: #FFFFFF;
+        border: 1px solid #E4E7EC;
+        box-shadow: 0px 1px 3px rgba(16, 24, 40, 0.1), 0px 1px 2px rgba(16, 24, 40, 0.06);
+        border-radius: 8px;
+    }
+    .dashboardleadsinfoboxheading{
+        margin: 21px 0px 0px 24px;
+        font-family: 'Inter', sans-serif !important;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        color: #101828;
+    }
+    .dashboardstatusinfobox{
+        width: 140px;
+        height: 150px;
+        background: #FFFFFF;
+        border: 1px solid #FEB470;
+        box-shadow: 0px 1px 3px rgba(16, 24, 40, 0.1), 0px 1px 2px rgba(16, 24, 40, 0.06);
+        border-radius: 8px;
+    }
+    .dashboardstatusinfoboxheading{
+        margin: 24px 24px 0px 24px;
+        font-family: 'Inter', sans-serif !important;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        color: #101828;
+    }
+    .dashboardstatusinfoboxvalue{
+        margin: 24px 0px 24px 24px;
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 600;
+        font-size: 36px;
+        line-height: 44px;
+        letter-spacing: -0.02em;
+        color: #101828;
+    }
+    .dashboardleadsinfovalue{
+        font-family: 'Inter', sans-serif !important;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 36px;
+		line-height: 52px;
+        letter-spacing: -0.02em;
+        color: #101828;
+        margin-top: 6px;
+    }
+    .dashboardleadsinfoboxline{
+        margin-top: 17px;
+        width: 100%;
+        height: 1px;
+        background: #E4E7EC;
+    }
+	.dashboardcircle{
+		width: 70px;
+		height: 70px;
+		background: rgb(183 141 33 / 29%);
+		border-radius: 50%;
+		line-height: 6em;
+		text-align: center;
+		
+	}
+	.dashboardicon{
+		width: 30px;
+		border-radius: 5px;
+		height: 30px;
+		background: #d6c387;
+    	color: #917e44;
+		line-height: 1.25em;
+	}
+</style>
+
+<div class="d-flex justify-content-between dashboardBox">
+	<h2 class="dashboardBoxHeading">Welcome back, Manvendra{{request.user.first_name}}</h2>
+	<div class="btn-group flex-wrap justify-content-end">
+		<div class="datetimepickerbox d-flex">
+			<input id="datepicker" placeholder="Select Date" onchange="fetchsleeplabsdata(this.value)">
+			<span class="input-group-addon">
+				<span class="glyphicon glyphicon-calendar"></span>
+			</span>
+		  </div>
+	</div>
+</div>
+
+<div class="d-flex justify-content-center">
+<span style="font-size:750%;color:#e4b301">&starf;</span>
+<span style="font-size:750%;color:#e4b301">&starf;</span>
+<span style="font-size:750%;color:#e4b301">&starf;</span>
+<span style="font-size:750%;">&starf;</span>
+<span style="font-size:750%;">&starf;</span>
+</div>
+
+<h3 class="text-center">Your sleep quality last night was </h3>
+<h1 class="text-center">Good</h1>
+
+<br>
+
+<div class="Dashboarddatabox">
+	<div id="totalleads" class="Dashboarddata dashboardleadsinfobox">
+		<h5 class="dashboardleadsinfoboxheading">Sleep Time</h5>
+		<div class="d-flex flex-row gap-4 ml-4 mt-2">
+			<!-- <div style="width: 56px; height: 56px;">
+				<img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
+			</div> -->
+			<div class="dashboardcircle">
+				<span class="material-symbols-outlined dashboardicon">
+					bedtime
+					</span>
+			</div>
+			<h4 class="dashboardleadsinfovalue counterclass" id='SleepTimevalue'>00:00:00</h4>
+		</div>
+		<div class="dashboardleadsinfoboxline"></div>
+		<!-- <a class="dashboardleadsinfoboxviewallbtn" href="#" onclick="isKeyPressed(event)">View All</a> -->
+	  </div>
+	<div id="Assignedleads" class="Dashboarddata dashboardleadsinfobox">
+	  <h5 class="dashboardleadsinfoboxheading">Bed Occupancy</h5>
+	  <div class="d-flex flex-row gap-4 ml-4 mt-2">
+		<!-- <div style="width: 56px; height: 56px;">
+			<img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
+		</div> -->
+		<div class="dashboardcircle">
+			<span class="material-symbols-outlined dashboardicon">
+				airline_seat_individual_suite
+				</span>
+		</div>
+		<h4 class="dashboardleadsinfovalue counterclass" id='BedOccupancyvalue'>00:00:00</h4>
+		</div>
+		<div class="dashboardleadsinfoboxline"></div>
+	</div>
+	<div id="Unassignedleads" class="Dashboarddata dashboardleadsinfobox">
+	  <h5 class="dashboardleadsinfoboxheading">Restful Sleep</h5>
+	  <div class="d-flex flex-row gap-4 ml-4 mt-2">
+		<!-- <div style="width: 56px; height: 56px;">
+			<img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
+		</div> -->
+		<div class="dashboardcircle">
+			<span class="material-symbols-outlined dashboardicon">
+				sleep
+				</span>
+		</div>
+		<h4 class="dashboardleadsinfovalue counterclass" id='RestfulSleepvalue'>00:00:00</h4>
+		</div>
+		<div class="dashboardleadsinfoboxline"></div>
+	</div>
+	<div id="Unassignedleads" class="Dashboarddata dashboardleadsinfobox">
+		<h5 class="dashboardleadsinfoboxheading">Restless Sleep</h5>
+		<div class="d-flex flex-row gap-4 ml-4 mt-2">
+		  <!-- <div style="width: 56px; height: 56px;">
+			  <img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
+		  </div> -->
+		  <div class="dashboardcircle">
+			<span class="material-symbols-outlined dashboardicon">
+				bedtime_off
+				</span>
+			</div>
+		  <h4 class="dashboardleadsinfovalue counterclass" id='RestlessSleepvalue'>00:00:00</h4>
+		  </div>
+		  <div class="dashboardleadsinfoboxline"></div>
+	  </div>
+</div>
+
+
+<!-- <div class="Dashboarddatabox">
+	<div id="ToDo" class="Dashboarddata dashboardstatusinfobox">
+	  <h5 class="dashboardstatusinfoboxheading">To Do Leads</h5>
+	  <h4 class="dashboardstatusinfoboxvalue counterclass" id="ToDoValue"></h4>
+	</div>
+
+	<div id="InProgress" class="Dashboarddata dashboardstatusinfobox">
+	  <h5 class="dashboardstatusinfoboxheading">In Progress Leads</h5>
+	  <h4 class="dashboardstatusinfoboxvalue counterclass" id="InProgressvalue"></h4>
+	</div>
+
+	<div id="Transferred" class="Dashboarddata dashboardstatusinfobox">
+	  <h5 class="dashboardstatusinfoboxheading">Transferred Leads</h5>
+	  <h4 class="dashboardstatusinfoboxvalue counterclass" id="Transferredvalue"></h4>
+	</div>
+
+	<div id="Completed" class="Dashboarddata dashboardstatusinfobox">
+	  <h5 class="dashboardstatusinfoboxheading">Completed Leads</h5>
+	  <h4 class="dashboardstatusinfoboxvalue counterclass" id="Completedvalue"></h4>
+	</div>
+
+	<div id="Rejected" class="Dashboarddata dashboardstatusinfobox" >
+	  <h5 class="dashboardstatusinfoboxheading">Rejected Leads</h5>
+	  <h4 class="dashboardstatusinfoboxvalue counterclass" id="Rejectedvalue"></h4>
+	</div>
+</div> -->
+
+<!-- <table>
+	<tr>
+	  <th>Parameter</th>
+	  <th>Value</th>
+	</tr>
+	<tr>
+	  <td>Total Sleep Hours</td>
+	  <td>8 hours</td>
+	</tr>
+	<tr>
+	  <td>Occupant Sleep Hours</td>
+	  <td>6 hours</td>
+	</tr>
+	<tr>
+	  <td>Restfull Hours</td>
+	  <td>5 hours 10 minutes</td>
+	</tr>
+	<tr>
+	  <td>Restless Events</td>
+	  <td>9 hours</td>
+	</tr>
+  </table> -->
+<!-- 
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+<script>
+  $( function() {
+	$( "#datepicker" ).datepicker({
+		dateFormat: "dd-mm-yy"
+		,	duration: "fast"
+	});
+} );
+</script> -->
+
+<script>
+	function getCookie(name) {
+	let cookieValue = null;
+	if (document.cookie && document.cookie !== "") {
+	  const cookies = document.cookie.split(";");
+	  for (let i = 0; i < cookies.length; i++) {
+		const cookie = cookies[i].trim();
+		// Does this cookie string begin with the name we want?
+		if (cookie.substring(0, name.length + 1) === (name + "=")) {
+		  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+		  break;
+		}
+	  }
+	}
+	return cookieValue;
+  }
+  </script>
+  <script>
+	function fetchsleeplabsdata(value){
+		console.log('value', value)
+	  fetch('/sleep_labs_graph_api', {
+		method: "POST",
+		credentials: "same-origin",
+		headers: {
+		  "X-Requested-With": "XMLHttpRequest",
+		  "X-CSRFToken": getCookie("csrftoken"),
+		},
+		body: JSON.stringify({Date: value})
+	  })
+	  .then(response => response.json())
+	  .then(data => {
+		console.log(data);
+		document.getElementById('SleepTimevalue').innerHTML = data.total_time+ " hrs";
+		document.getElementById('BedOccupancyvalue').innerHTML = data.Bed_Occupancy_total_time+ " hrs";
+		document.getElementById('RestfulSleepvalue').innerHTML = data.sleep_time+ " hrs";
+		document.getElementById('RestlessSleepvalue').innerHTML = data.awake_time+ " hrs";
+	  });
+	}
+  </script>
+  
+{% endblock content %}
