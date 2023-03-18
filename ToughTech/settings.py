@@ -88,7 +88,7 @@ DATABASES = {
         'PASSWORD': 'hggk2EJL7LAwbU8',
         'HOST': 'ec2-13-232-235-14.ap-south-1.compute.amazonaws.com', 
         'PORT': 5432
-    }
+    }
 }
 
 
