@@ -155,3 +155,27 @@ def sleep_labs_graph_api(request):
         #                 'aczdata' : int(row['AcZ']), 'gyzdata' : int(row['GyZ']), 'gyxdata' : int(row['GyX']), 
         #                 'gyydata' : int(row['GyY']), 'occdata': int(row['OCC']), 'accmag': row['accel_mag']}
         #     full_data.append(dict_data)
+#Add the following at line 32
+@csrf_exempt
+def deviceData(request):
+    if request.method =="POST":
+        bodyDecoded = request.body.decode('utf-8')
+        bodyJson = json.loads(bodyDecoded)
+
+        deviceID = bodyJson['DeviceID']
+        print('Received data from ' + deviceID)
+        for i in range(len(bodyJson) - 1):
+            sample = 'S' + str(i)
+            acX = bodyJson[sample]['AcX']
+            acY = bodyJson[sample]['AcY']
+            acZ = bodyJson[sample]['AcZ']
+            gyX = bodyJson[sample]['GyX']
+            gyY = bodyJson[sample]['GyY']
+            gyZ = bodyJson[sample]['GyZ']
+            occ = bodyJson[sample]['Occ']
+            dataSample = SleepLab(AcX=acX, AcY=acY, AcZ=acZ, GyX=gyX, GyY=gyY, GyZ=gyZ, OCC=occ, DevID=deviceID)
+            dataSample.save()
+        
+        return HttpResponse('Device Data Saved')
+    
+    return HttpResponse('Request Method Error')
