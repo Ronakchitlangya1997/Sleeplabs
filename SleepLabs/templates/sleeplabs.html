@@ -124,7 +124,7 @@ tr:nth-child(odd) {
 </style>
 
 <div class="d-flex justify-content-between dashboardBox">
-	<h2 class="dashboardBoxHeading">Welcome back, Manvendra{{request.user.first_name}}</h2>
+	<h2 class="dashboardBoxHeading">Welcome back, {{request.user.first_name}}</h2>
 	<div class="btn-group flex-wrap justify-content-end">
 		<div class="datetimepickerbox d-flex">
 			<input id="datepicker" placeholder="Select Date" onchange="fetchsleeplabsdata(this.value)">
@@ -150,7 +150,7 @@ tr:nth-child(odd) {
 
 <div class="Dashboarddatabox">
 	<div id="totalleads" class="Dashboarddata dashboardleadsinfobox">
-		<h5 class="dashboardleadsinfoboxheading">Sleep Time</h5>
+		<h5 class="dashboardleadsinfoboxheading">Total Time</h5>
 		<div class="d-flex flex-row gap-4 ml-4 mt-2">
 			<!-- <div style="width: 56px; height: 56px;">
 				<img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
@@ -166,7 +166,7 @@ tr:nth-child(odd) {
 		<!-- <a class="dashboardleadsinfoboxviewallbtn" href="#" onclick="isKeyPressed(event)">View All</a> -->
 	  </div>
 	<div id="Assignedleads" class="Dashboarddata dashboardleadsinfobox">
-	  <h5 class="dashboardleadsinfoboxheading">Bed Occupancy</h5>
+	  <h5 class="dashboardleadsinfoboxheading">Sleep Time</h5>
 	  <div class="d-flex flex-row gap-4 ml-4 mt-2">
 		<!-- <div style="width: 56px; height: 56px;">
 			<img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
@@ -211,7 +211,10 @@ tr:nth-child(odd) {
 		  <div class="dashboardleadsinfoboxline"></div>
 	  </div>
 </div>
-
+<ul>
+<div id="chatGPT" style="margin-top: 43px;"></div>
+<!-- <li id="chatGPT1"></li> -->
+</ul>
 
 <!-- <div class="Dashboarddatabox">
 	<div id="ToDo" class="Dashboarddata dashboardstatusinfobox">
@@ -275,6 +278,32 @@ tr:nth-child(odd) {
 </script> -->
 
 <script>
+	function sleepinfo(){
+	const chatGPTResponse = "Of the "+sleepdata.total_time +" hours of monitoring, you slept for "+ parseInt((sleepdata.Bed_Occupancy_total_time/sleepdata.total_time)*100) + "% of the time. Your pillow was unoccupied for "+ 
+	(100- parseInt((sleepdata.Bed_Occupancy_total_time/sleepdata.total_time)*100))+
+	"% of the time. You used your pillow in a sitting position for 10% of the time. You slept restfully for " + 
+	parseInt((sleepdata.sleep_time/sleepdata.Bed_Occupancy_total_time)*100) +
+	"% of the entire sleep duration";
+	const chatGPTDiv = document.getElementById("chatGPT");
+	
+	// Split the ChatGPT response into individual characters
+	const chatGPTResponseChars = chatGPTResponse.split("");
+	
+	// Use a loop to add each character to the div with a delay
+	let i = 0;
+	const intervalId = setInterval(() => {
+	  chatGPTDiv.innerHTML += chatGPTResponseChars[i];
+	  i++;
+	  if (i === chatGPTResponseChars.length) {
+		clearInterval(intervalId);
+		// litagdata()
+	  }
+	}, 50);
+
+}
+  </script>
+
+<script>
 	function getCookie(name) {
 	let cookieValue = null;
 	if (document.cookie && document.cookie !== "") {
@@ -292,6 +321,7 @@ tr:nth-child(odd) {
   }
   </script>
   <script>
+	var sleepdata;
 	function fetchsleeplabsdata(value){
 		console.log('value', value)
 	  fetch('/sleep_labs_graph_api', {
@@ -301,17 +331,40 @@ tr:nth-child(odd) {
 		  "X-Requested-With": "XMLHttpRequest",
 		  "X-CSRFToken": getCookie("csrftoken"),
 		},
-		body: JSON.stringify({Date: value})
+		body: JSON.stringify({Date: value, "Deviceid": "{{request.user.Device_name}}"})
 	  })
 	  .then(response => response.json())
 	  .then(data => {
 		console.log(data);
+		sleepdata = data
 		document.getElementById('SleepTimevalue').innerHTML = data.total_time+ " hrs";
 		document.getElementById('BedOccupancyvalue').innerHTML = data.Bed_Occupancy_total_time+ " hrs";
 		document.getElementById('RestfulSleepvalue').innerHTML = data.sleep_time+ " hrs";
 		document.getElementById('RestlessSleepvalue').innerHTML = data.awake_time+ " hrs";
+		sleepinfo()
 	  });
 	}
   </script>
+<!-- <script>
+	function litagdata(){
+	const chatGPTResponse1 = "This is the ChatGPT response. It will appear as if it's being typed out in real-time.";
+	const chatGPTDiv1 = document.getElementById("chatGPT1");
+	
+	// Split the ChatGPT response into individual characters
+	const chatGPTResponseChars1 = chatGPTResponse.split("");
+
+
+	let j = 0;
+	const intervalId1 = setInterval(() => {
+		chatGPTDiv1.innerHTML += chatGPTResponseChars1[j];
+	  j++;
+	  if (j === chatGPTResponseChars1.length) {
+		clearInterval(intervalId1);
+	  }
+	}, 50);
+
+	}
+  </script> -->
+
   
 {% endblock content %}

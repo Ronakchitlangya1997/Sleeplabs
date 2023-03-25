@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from Authentication.models import User
 
 # Create your models here.
 class SleepLab(models.Model):

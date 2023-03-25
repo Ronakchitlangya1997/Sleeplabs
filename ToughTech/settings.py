@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'SleepLabs.apps.SleeplabsConfig',
+    'Authentication.apps.AuthenticationConfig',
     'rest_framework',
     'corsheaders'
 ]
@@ -72,6 +73,8 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTH_USER_MODEL = 'Authentication.User'
 
 WSGI_APPLICATION = 'ToughTech.wsgi.application'
 

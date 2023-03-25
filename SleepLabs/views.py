@@ -7,8 +7,10 @@ import json
 import datetime
 import numpy as np
 import math
+from django.contrib.auth.decorators import login_required 
 # Create your views here.
 
+@login_required(login_url='login')
 def home(request):
     return render(request, 'sleeplabs.html')
 
@@ -63,14 +65,14 @@ def sleep_labs_graph_api(request):
     if request.method == "POST":
         sleep_data = {}
         jsondata = json.loads(request.body)
+        print(jsondata)
         if(jsondata['Date']) == 'today':
             Date = datetime.date.today()
         else:
             Date = jsondata['Date']
         full_data =[]
-        print(Date)
 
-        df = pd.DataFrame(list(SleepLab.objects.filter(timestamp__date = Date).order_by('timestamp').values()))
+        df = pd.DataFrame(list(SleepLab.objects.filter(DevID=jsondata['Deviceid'],timestamp__date = Date).order_by('timestamp').values()))
         print(df)
         x = []
         df['AcX'] = df['AcX'].astype('int')
@@ -86,14 +88,14 @@ def sleep_labs_graph_api(request):
         # Convert the datetime column to a datetime object
         df['Timestamp'] = pd.to_datetime(df['timestamp'])
 
-        # Extract the time data from the DataFrame
         time = df['Timestamp'].values
 
         # Calculate the sample rate and total time
         sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
-        total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
-        print(" total_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
-        sleep_data['total_time'] = round((total_time/(60*60*1000)),2)
+        total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 's')))
+        # print(" total_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
+        
+        sleep_data['total_time'] = str(datetime.timedelta(seconds=total_time))
         
         df = df[df['OCC'].astype(int) == 1].reset_index()
         # Extract the time data from the DataFrame
@@ -101,11 +103,13 @@ def sleep_labs_graph_api(request):
 
         # Calculate the sample rate and total time
         sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
-        total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
+        total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 's')))
+        sleep_data['Bed_Occupancy_total_time'] = str(datetime.timedelta(seconds=total_time))
 
         #Calculate the sleep time and awake time
         magnitude = df['Magnitude'].values
-        threshold = np.mean(magnitude) + 0.5 * np.std(magnitude)
+        threshold = 1
+        #threshold = np.mean(magnitude) + 0.5 * np.std(magnitude)
 
         sleep_time = len(np.where(magnitude < threshold)[0]) * sample_rate // 1000
         awake_time = total_time // 1000 - sleep_time
@@ -121,13 +125,14 @@ def sleep_labs_graph_api(request):
         # # Print the results
         print("Bed_Occupancy_total_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
         print(" sample_rate :", sample_rate)
-
-
         print(" sleep_time : %ds ; %shr: " %(sleep_time, str(datetime.timedelta(seconds=sleep_time)) ))
         print(" awake_time : %ds ; %shr: " %(awake_time, str(datetime.timedelta(seconds=awake_time)) ))
-        print(" move_duration : %ds ; %dhr: " %(move_duration, move_duration/(60*60) ))
-        print(" move_freq:", move_freq)
-        sleep_data['Bed_Occupancy_total_time'] = round ((total_time/(60*60*1000)),2)
+        #print(" move_duration : %ds ; %dhr: " %(move_duration, move_duration/(60*60) ))
+        #print(" move_freq:", move_freq)
+        
+        
+
+
         sleep_data['sample_rate'] = sample_rate
         sleep_data['sleep_time'] = str(datetime.timedelta(seconds=sleep_time))
         sleep_data['awake_time'] = str(datetime.timedelta(seconds=awake_time))

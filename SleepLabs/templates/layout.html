@@ -189,6 +189,10 @@
           </div> -->
 
         </div>
+        <li class="logoutbtntxt" style="list-style: none;">Logged in as: {{ request.user.first_name }}</li>
+          <div class="material-icons logout-icon ml-3" style="font-size:20px;">logout</div>
+            <a href="{% url 'logout'%}" class="navibutton ml-1 logout cursor fontFamily logoutbtn">Logout</a>
+            
       </nav>
       <div class="spinner" id="LoadingbarGifid" style="position: fixed;
       top: 0px;

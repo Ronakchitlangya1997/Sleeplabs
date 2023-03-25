@@ -4,5 +4,5 @@ from SleepLabs.models import SleepLab
 
 class SleepLabs_Admin(admin.ModelAdmin):
 
-    list_display = ['id', 'AcX', 'AcY', 'AcZ', 'GyX', 'GyY', 'GyZ', 'OCC', 'timestamp']
+    list_display = ['id', 'AcX', 'AcY', 'AcZ', 'GyX', 'GyY', 'GyZ', 'OCC','DevID', 'timestamp']
 admin.site.register(SleepLab, SleepLabs_Admin)
