@@ -156,7 +156,7 @@ def sleep_labs_graph_api(request):
         #                 'gyydata' : int(row['GyY']), 'occdata': int(row['OCC']), 'accmag': row['accel_mag']}
         #     full_data.append(dict_data)
 #Add the following at line 32
-
+@csrf_exempt
 def deviceData(request):
     if request.method =="POST":
         bodyDecoded = request.body.decode('utf-8')
