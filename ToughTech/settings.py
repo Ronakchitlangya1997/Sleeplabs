@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'SleepLabs.apps.SleeplabsConfig',
+    'Authentication.apps.AuthenticationConfig',
     'rest_framework',
     'corsheaders'
 ]
@@ -72,6 +73,8 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTH_USER_MODEL = 'Authentication.User'
 
 WSGI_APPLICATION = 'ToughTech.wsgi.application'
 
@@ -119,3 +122,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# For deleting bigger entries
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000000
