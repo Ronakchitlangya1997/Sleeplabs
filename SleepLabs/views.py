@@ -180,31 +180,31 @@ def deviceData(request):
 
 
         time = now
-        for i in range(len(bodyJson) - 1):
+        # for i in range(len(bodyJson) - 1):
 
-            sample = 'S' + str(len(bodyJson) - 1 - i -1)
-            print(sample)
-            #print(time)
-            # acX = bodyJson[sample]['AcX']
-            # acY = bodyJson[sample]['AcY']
-            # acZ = bodyJson[sample]['AcZ']
-            # gyX = bodyJson[sample]['GyX']
-            # gyY = bodyJson[sample]['GyY']
-            # gyZ = bodyJson[sample]['GyZ']
-            # occ = bodyJson[sample]['Occ']
+        #     sample = 'S' + str(len(bodyJson) - 1 - i -1)
+        #     print(sample)
+        #     #print(time)
+        #     # acX = bodyJson[sample]['AcX']
+        #     # acY = bodyJson[sample]['AcY']
+        #     # acZ = bodyJson[sample]['AcZ']
+        #     # gyX = bodyJson[sample]['GyX']
+        #     # gyY = bodyJson[sample]['GyY']
+        #     # gyZ = bodyJson[sample]['GyZ']
+        #     # occ = bodyJson[sample]['Occ']
 
-            packetTime = time
-            bodyJson[sample]['time'] = packetTime.strftime("%d/%m/%Y %H:%M:%S.%f")
+        #     packetTime = time
+        #     bodyJson[sample]['time'] = packetTime.strftime("%d/%m/%Y %H:%M:%S.%f")
 
-            time = time - datetime.timedelta(milliseconds=250)
-            print(packetTime)
+        #     time = time - datetime.timedelta(milliseconds=250)
+        #     print(packetTime)
             
             
-            # dataSample = SleepLab(AcX=acX, AcY=acY, AcZ=acZ, GyX=gyX, GyY=gyY, GyZ=gyZ, OCC=occ, DevID=deviceID, timestamp=time)
-            # dataSample.save()
-            # time = time - datetime.timedelta(milliseconds=250)
+        #     # dataSample = SleepLab(AcX=acX, AcY=acY, AcZ=acZ, GyX=gyX, GyY=gyY, GyZ=gyZ, OCC=occ, DevID=deviceID, timestamp=time)
+        #     # dataSample.save()
+        #     # time = time - datetime.timedelta(milliseconds=250)
         
-        print(bodyJson)
+        # print(bodyJson)
 
         dataSample = SleepLabOptv1(DevID=deviceID, timestamp=time,jsonData=bodyJson)
         dataSample.save()
