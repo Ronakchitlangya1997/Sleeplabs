@@ -123,4 +123,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# For deleting bigger entries
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000000
