@@ -4,6 +4,71 @@
 {% block content %}
 
 <style>
+	.datetimeForm{
+            display: none;
+            position: absolute;
+            width: 600px;
+            height: auto;
+            padding-bottom: 10px;
+            top: 20%;
+            left: 0;
+            right: 0;
+            margin: auto;
+            z-index: 2;
+            background: #FFFFFF;
+            box-shadow: 0px 2.4px 7.4px rgb(0 0 0 / 18%), 0px 12.8px 28.8px rgb(0 0 0 / 22%);
+            border-radius: 2px;
+        }
+        .datetimeFormHeading{
+            font-family: 'Inter', sans-serif !important;
+            font-style: normal;
+            font-weight: 700;
+            font-size: 20px;
+            line-height: 24px;
+            color: #242424;
+        }
+        .datetimeFormInput{
+            width: 100%;
+            height: 44px;
+            background: #FFFFFF;
+            border: 1px solid #D0D5DD;
+            box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
+            border-radius: 5px;
+            font-family: 'Inter', sans-serif !important;
+            font-style: normal;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 20px;
+            padding-left: 10px;
+            padding-right: 10px;
+            outline: none;
+        }
+        .datetimeFormLabel{
+            font-family: 'Inter', sans-serif !important;
+            font-style: normal;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 20px;
+            text-transform: capitalize;
+            color: #344054;
+        }
+        .addNewdatetimeFormSubmitBtn, .confirmsubmitbtn{
+            float: right;
+            margin: 20px 5px 0px 0px;
+            background: #AE8F30;
+            border-radius: 4px;
+            width: 100px;
+            height: 35px;
+            color: #ffffff;
+            border: 0px;
+            font-family: 'Segoe UI';
+            font-style: normal;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 19px;
+            text-align: center;
+            color: #FFFFFF;
+        }
 table {
 	font-family: arial, sans-serif;
 	border-collapse: collapse;
@@ -121,30 +186,90 @@ tr:nth-child(odd) {
     	color: #917e44;
 		line-height: 1.25em;
 	}
+
+	.selectnewdatetimeBtn{
+            background: #AE8F30;
+            box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
+            border-radius: 8px;
+            border: 0px solid #AE8F30;
+            padding: 10px 18px;
+            color: #ffffff;
+            width: 177px;
+            height: 44px;
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 24px;
+        }
+		.glyphicon {
+    		top: 8px!important;
+			}
+
+			.datetimeinputspan{
+				font-size: 30px;
+    			margin-left: 10px;
+    			margin-right: 10px;
+			}
+			.sublabelheading{
+				text-align: center;
+				margin-top: 15px;
+				margin-left: 10px;
+				font-family: 'Inter', sans-serif !important;
+				font-style: normal;
+				font-weight: 500;
+				font-size: 14px;
+				line-height: 20px;
+				text-transform: capitalize;
+				color: #344054;
+
+			}
+			.selectdatetimeFormsubId{
+				padding: 30px 32px 30px 32px;
+			}
+			.mask{
+				display: none;
+				background: rgb(14, 14, 14);
+				width: 100%;
+				height: 100%;
+				position: fixed;
+				top: 0px;
+				opacity: 0.7;
+				margin-left: -120px;
+			}
 </style>
 
 <div class="d-flex justify-content-between dashboardBox">
 	<h2 class="dashboardBoxHeading">Welcome back, {{request.user.first_name}}</h2>
 	<div class="btn-group flex-wrap justify-content-end">
 		<div class="datetimepickerbox d-flex">
-			<input id="datepicker" placeholder="Select Date" onchange="fetchsleeplabsdata(this.value)">
-			<span class="input-group-addon">
-				<span class="glyphicon glyphicon-calendar"></span>
-			</span>
+			<button class="selectnewdatetimeBtn" onclick="opencloseaddnewdatetimeForm()">Select Date Time</button>
+			<!-- <div class="d-flex">
+				<input id="datepicker" placeholder="Start Date" onchange="fetchsleeplabsdata(this.value)">
+				<span class="input-group-addon">
+					<span class="glyphicon glyphicon-calendar"></span>
+				</span>
+			</div>
+			<div class="d-flex">
+				<input id="datepicker1" placeholder="End Date" onchange="fetchsleeplabsdata(this.value)">
+				<span class="input-group-addon">
+					<span class="glyphicon glyphicon-calendar"></span>
+				</span>
+			</div> -->
 		  </div>
 	</div>
 </div>
 
 <div class="d-flex justify-content-center">
-<span style="font-size:750%;color:#e4b301">&starf;</span>
-<span style="font-size:750%;color:#e4b301">&starf;</span>
-<span style="font-size:750%;color:#e4b301">&starf;</span>
-<span style="font-size:750%;">&starf;</span>
-<span style="font-size:750%;">&starf;</span>
+<span id="star1" style="font-size:750%;">&starf;</span>
+<span id="star2" style="font-size:750%;">&starf;</span>
+<span id="star3" style="font-size:750%;">&starf;</span>
+<span id="star4" style="font-size:750%;">&starf;</span>
+<span id="star5" style="font-size:750%;">&starf;</span>
 </div>
 
 <h3 class="text-center">Your sleep quality last night was </h3>
-<h1 class="text-center">Good</h1>
+<h1 id="sleepquality" class="text-center">Select Date</h1>
 
 <br>
 
@@ -213,8 +338,56 @@ tr:nth-child(odd) {
 </div>
 <ul>
 <div id="chatGPT" style="margin-top: 43px;"></div>
+
+<div class="datetimeForm" id="addNewdatetimeFormId">
+	<div class="selectdatetimeFormsubId">
+		<div class="d-flex">
+			<p class="datetimeFormHeading">Select Date Time</p>
+			<div class="material-icons" onclick="opencloseaddnewdatetimeForm()" style="margin-left: auto; margin-top:5px;">clear</div>
+		</div>
+		<form method="POST" id="selectdatetimeform" enctype="multipart/form-data">{% csrf_token %}
+			<div class="d-flex flex-column mt-2">
+				<label class="datetimeFormLabel">Select Date</label>
+				<div class="d-flex">
+					<input class="datetimeFormInput" id="datepicker" name="datepicker" placeholder="Select Date" autocomplete="off">
+					<span class="input-group-addon">
+						<span class="glyphicon glyphicon-calendar"></span>
+					</span>
+				</div>
+			</div>
+
+			<div class="d-flex flex-column mt-2">
+				<label class= "datetimeFormLabel">Start Time  :</label>
+				<div class="d-flex">
+					<input class='datetimeFormInput' type="number" id="StartTimehours" name="StartTimehours" min=00 max=24 step=1 value=12>
+					<span class="datetimeinputspan">:</span>
+					<input  class='datetimeFormInput' type="number" id="StartTimemin" name="StartTimemin" min=00 max=60 step=1 value=00>
+					<span class="datetimeinputspan">:</span>
+					<input class='datetimeFormInput' type="number" id="StartTimesec" name="StartTimesec" min=00 max=60 step=1 value=00>
+					<label class= "sublabelheading" >H:M:S</label>
+				</div>
+			</div>
+
+			<div class="d-flex flex-column mt-2">
+				<label class= "datetimeFormLabel">End Time  :</label>
+				<div class="d-flex">
+					<input class='datetimeFormInput' type="number" id="EndTimehours" name="EndTimehours" min=00 max=24 step=1 value=12 >
+					<span class="datetimeinputspan">:</span>
+					<input  class='datetimeFormInput' type="number" id="EndTimemin" name="EndTimemin" min=000 max=60 step=1 value=00 >
+					<span class="datetimeinputspan">:</span>
+					<input class='datetimeFormInput' type="number" id="EndTimesec" name="EndTimesec" min=00 max=60 step=1 value=00>
+					<label class= "sublabelheading" >H:M:S</label>
+				</div>
+			</div>
+
+			<hr class="mt-4 mb-0">
+
+			<button class="addNewdatetimeFormSubmitBtn" id='submitdatetime'>Submit</button>
+		</form>
+	</div>
+</div>
+<div class="mask" id="maskid"></div> 
 <!-- <li id="chatGPT1"></li> -->
-</ul>
 
 <!-- <div class="Dashboarddatabox">
 	<div id="ToDo" class="Dashboarddata dashboardstatusinfobox">
@@ -276,14 +449,30 @@ tr:nth-child(odd) {
 	});
 } );
 </script> -->
+<script>
+	var maskhover = document.getElementById('maskid');
+	
+	maskhover.addEventListener('click',function(){
+	this.style.display="none";
+	document.getElementById('addNewdatetimeFormId').style.display='none'
+	})
+</script>
+<script>
+	function opencloseaddnewdatetimeForm(){
+		if (document.getElementById('addNewdatetimeFormId').style.display=='block'){
+			document.getElementById('addNewdatetimeFormId').style.display='none'
+			document.getElementById("maskid").style.display='none'
+		}else{
+			document.getElementById('addNewdatetimeFormId').style.display='block'
+			
+			document.getElementById("maskid").style.display='block'
+		}
+	}
+</script>
 
 <script>
-	function sleepinfo(){
-	const chatGPTResponse = "Of the "+sleepdata.total_time +" hours of monitoring, you slept for "+ parseInt((sleepdata.Bed_Occupancy_total_time/sleepdata.total_time)*100) + "% of the time. Your pillow was unoccupied for "+ 
-	(100- parseInt((sleepdata.Bed_Occupancy_total_time/sleepdata.total_time)*100))+
-	"% of the time. You used your pillow in a sitting position for 10% of the time. You slept restfully for " + 
-	parseInt((sleepdata.sleep_time/sleepdata.Bed_Occupancy_total_time)*100) +
-	"% of the entire sleep duration";
+	function sleepinfo(sleepinfodata){
+	const chatGPTResponse = sleepinfodata
 	const chatGPTDiv = document.getElementById("chatGPT");
 	
 	// Split the ChatGPT response into individual characters
@@ -324,24 +513,57 @@ tr:nth-child(odd) {
 	var sleepdata;
 	function fetchsleeplabsdata(value){
 		console.log('value', value)
-	  fetch('/sleep_labs_graph_api', {
+	  fetch('/sleep_labs_graph_api_v2', {
 		method: "POST",
 		credentials: "same-origin",
 		headers: {
 		  "X-Requested-With": "XMLHttpRequest",
 		  "X-CSRFToken": getCookie("csrftoken"),
 		},
-		body: JSON.stringify({Date: value, "Deviceid": "{{request.user.Device_name}}"})
+		body: JSON.stringify(value)
 	  })
 	  .then(response => response.json())
 	  .then(data => {
 		console.log(data);
+		document.getElementById("maskid").style.display='none'
+		document.getElementById('addNewdatetimeFormId').style.display='none'
 		sleepdata = data
+		document.getElementById("star1").style.color=""
+		document.getElementById("star2").style.color=""
+		document.getElementById("star3").style.color=""
+		document.getElementById("star4").style.color=""
+		document.getElementById("star5").style.color=""
+		document.getElementById("chatGPT").innerHTML = ""
+		document.getElementById('sleepquality').innerHTML = "Select Date"
+		if(data.Sleep_star == 1){
+			document.getElementById("star1").style.color="#e4b301"
+		}else if(data.Sleep_star == 2){
+			document.getElementById("star1").style.color="#e4b301"
+			document.getElementById("star2").style.color="#e4b301"
+		}else if(data.Sleep_star == 3){
+			document.getElementById("star1").style.color="#e4b301"
+			document.getElementById("star2").style.color="#e4b301"
+			document.getElementById("star3").style.color="#e4b301"
+		}else if(data.Sleep_star == 4){
+			document.getElementById("star1").style.color="#e4b301"
+			document.getElementById("star2").style.color="#e4b301"
+			document.getElementById("star3").style.color="#e4b301"
+			document.getElementById("star4").style.color="#e4b301"
+		}else{
+			document.getElementById("star1").style.color="#e4b301"
+			document.getElementById("star2").style.color="#e4b301"
+			document.getElementById("star3").style.color="#e4b301"
+			document.getElementById("star4").style.color="#e4b301"
+			document.getElementById("star5").style.color="#e4b301"
+		}
+		document.getElementById('sleepquality').innerHTML = data.Sleep_quality
 		document.getElementById('SleepTimevalue').innerHTML = data.total_time+ " hrs";
-		document.getElementById('BedOccupancyvalue').innerHTML = data.Bed_Occupancy_total_time+ " hrs";
+		document.getElementById('BedOccupancyvalue').innerHTML = data.bedOccupantTime+ " hrs";
 		document.getElementById('RestfulSleepvalue').innerHTML = data.sleep_time+ " hrs";
 		document.getElementById('RestlessSleepvalue').innerHTML = data.awake_time+ " hrs";
-		sleepinfo()
+		sleepinfodata = data.Sleep_info
+		sleepinfo(sleepinfodata)
+
 	  });
 	}
   </script>
@@ -365,6 +587,26 @@ tr:nth-child(odd) {
 
 	}
   </script> -->
+  
+ 
+ <script>
+	const btn = document.getElementById('submitdatetime');
+	const form = document.getElementById('selectdatetimeform');
+
+
+        btn.addEventListener('click', (e) => {
+			event.preventDefault();
+
+			const formData = new FormData(form);
+			datajson = {"Date":formData.get('datepicker'), "StartTimehours": formData.get('StartTimehours'), 
+						"StartTimemin":formData.get('StartTimemin'), "StartTimesec":formData.get('StartTimesec'),
+						'EndTimehours': formData.get('EndTimehours'), 'EndTimemin': formData.get('EndTimemin'),
+						'EndTimesec': formData.get('EndTimesec')	
+					}
+			console.log('DateTimedata', datajson)
+			fetchsleeplabsdata(datajson)
+		})
+</script>
 
   
 {% endblock content %}

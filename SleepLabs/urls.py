@@ -7,7 +7,7 @@ urlpatterns = [
     path('sleep_labs_graph_api', sleep_labs_graph_api, name="sleep_labs_graph_api"),
     path('home', home, name="home"),
     path('deviceData/', deviceData, name="deviceData"),
-    path('sleep_labs_graph_api_v2/', sleep_labs_graph_api_v2, name="sleep_labs_graph_api_v2"),
+    path('sleep_labs_graph_api_v2', sleep_labs_graph_api_v2, name="sleep_labs_graph_api_v2"),
     path('processSleepData/', processSleepData, name="processSleepData"),
     path('algo/', algo, name="algo"),
 ]

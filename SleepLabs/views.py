@@ -259,27 +259,40 @@ def sleep_labs_graph_api_v2(request):
 
     #Fetch from a certain timestamp
 
-    date_str_start = '2023-03-29'
-    date_str_end = '2023-03-29'
-    start_time_str = '16:00:00'
-    end_time_str = '17:00:00'
+    if request.method == "POST":
+        sleep_data = {}
+        jsondata = json.loads(request.body)
+        date_str_start = jsondata['Date']
+        date_str_end = jsondata['Date']
+        start_time_str = jsondata['StartTimehours']+":"+jsondata['StartTimemin']+":"+jsondata['StartTimesec']
+        end_time_str = jsondata['EndTimehours']+":"+jsondata['EndTimemin']+":"+jsondata['EndTimesec']
 
-    start_datetime_str = date_str_end + ' ' + start_time_str
-    end_datetime_str = date_str_end + ' ' + end_time_str
+        print(date_str_start, date_str_end, start_time_str, end_time_str)
+        # date_str_start = '2023-03-29'
+        # date_str_end = '2023-03-29'
+        # start_time_str = '16:00:00'
+        # end_time_str = '17:00:00'
 
-    df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
+        start_datetime_str = date_str_end + ' ' + start_time_str
+        end_datetime_str = date_str_end + ' ' + end_time_str
 
-    print("Fetching the raw dataframe :")
-    print(df)
+        df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
 
-    df.to_csv('./rawData.csv')
+        print("Fetching the raw dataframe :")
+        print(df)
 
+        df.to_csv('./rawData.csv')
+        processSleep_Data = processSleepData()
+
+        algo_Data = algo()
+        
+        return HttpResponse(algo_Data)
    
     return HttpResponse('ok')
 
 
 
-def processSleepData(df) :
+def processSleepData() :
     df = pd.read_csv('./rawData.csv')
 
     df['jsonData'] = df['jsonData'].apply(converStringToDict)
@@ -315,7 +328,7 @@ def processSleepData(df) :
 
     return HttpResponse('ok')
 
-def algo(request) :
+def algo() :
 
     df = pd.read_csv('./processedData.csv')
 
@@ -375,8 +388,16 @@ def algo(request) :
 
     sleep_data['sleep_time'] =  str(datetime.timedelta(seconds=sleep_time))
     sleep_data['awake_time'] =  str(datetime.timedelta(seconds=awake_time))
+    Sleep_info = "Plz provide sleep info in backend"
+    sleep_data['Sleep_info'] = Sleep_info
+    Sleep_star = 2
+    sleep_data['Sleep_star'] = Sleep_star
+    Sleep_quality = "Bad"
+    sleep_data['Sleep_quality'] = Sleep_quality
 
 
 
-    return HttpResponse('ok')
+
+    jsonapidata = json.dumps(sleep_data)
+    return HttpResponse(jsonapidata)
 
