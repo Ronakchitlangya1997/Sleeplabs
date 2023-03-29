@@ -248,8 +248,8 @@ def timestampKey(t, d, id):
     return d
          
 
-def processSleepData(request) :
-    df = pd.read_csv('./28thMar.csv')
+def processSleepData(df) :
+    df = pd.read_csv('./rawData.csv')
 
     df['jsonData'] = df['jsonData'].apply(converStringToDict)
 
@@ -280,13 +280,13 @@ def processSleepData(request) :
 
     print(df_new)
 
-    df_new.to_csv('./mansa.csv')
+    df_new.to_csv('./processedData.csv')
 
     return HttpResponse('ok')
 
 def algo(request) :
 
-    df = pd.read_csv('./mansa.csv')
+    df = pd.read_csv('./processedData.csv')
 
     df = df[::-1]
     x = []
@@ -305,20 +305,25 @@ def algo(request) :
 
     time = df['Timestamp'].values
 
+    #print(df)
     # Calculate the sample rate and total time
     sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
     total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
-    print("total_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
+
+    total_time_s = round(total_time/1000)
+
+    print("total_time : %ds ; %shr: " %(total_time_s, str(datetime.timedelta(seconds=total_time_s)) ))
+    #print("total_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
     print("total sample_rate:",sample_rate)
     
     #sleep_data['total_time'] = str(datetime.timedelta(seconds=total_time))
     
-    df = df[df['Occ'].astype(int) == 1].reset_index()
+    #df = df[df['Occ'].astype(int) == 1].reset_index()
     # Extract the time data from the DataFrame
     time = df['Timestamp'].values
 
     # Calculate the sample rate and total time
-    sleep_sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
+    #sleep_sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
     total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
     print("sleep_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
     #print("sleep sample_rate:",sample_rate)
@@ -341,101 +346,38 @@ def algo(request) :
     move_freq = len(move_timestamps) / awake_time
 
 
-    print(" sleep_time : %ds ; %shr: " %(sleep_time, str(datetime.timedelta(seconds=sleep_time)) ))
-    print(" awake_time : %ds ; %shr: " %(awake_time, str(datetime.timedelta(seconds=awake_time)) ))
+    print("sleep_time : %ds ; %shr: " %(sleep_time, str(datetime.timedelta(seconds=sleep_time)) ))
+    print("awake_time : %ds ; %shr: " %(awake_time, str(datetime.timedelta(seconds=awake_time)) ))
+    print("Move Timestamp", move_timestamps)
 
     return HttpResponse('ok')
 
 def sleep_labs_graph_api_v2(request):
 
-    #x = SleepLabOptv1.objects.all().values()
-    df = pd.DataFrame.from_records(SleepLabOptv1.objects.all().values())
+    
+    #Fetch All
+    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.all().values())
 
+    #Fetch certain date
+    #date_str = '2023-03-29'
+    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__startswith=date_str).values())
+
+    #Fetch from a certain timestamp
+
+    date_str = '2023-03-28'
+    start_time_str = '21:00:00'
+    end_time_str = '23:59:00'
+
+    start_datetime_str = date_str + ' ' + start_time_str
+    end_datetime_str = date_str + ' ' + end_time_str
+
+    df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
+
+    print("Fetching the raw dataframe :")
     print(df)
-    print(df.dtypes)
 
-    df.to_csv('./28thMar.csv')
-    #mydata = Member.objects.filter(firstname__contains='bias').values()
+    df.to_csv('./rawData.csv')
 
-    #print(x)
-
-    # if request.method == "POST":
-    #     sleep_data = {}
-    #     jsondata = json.loads(request.body)
-    #     print(jsondata)
-    #     if(jsondata['Date']) == 'today':
-    #         Date = datetime.date.today()
-    #     else:
-    #         Date = jsondata['Date']
-    #     full_data =[]
-
-    #     df = pd.DataFrame(list(SleepLab.objects.filter(DevID=jsondata['Deviceid'],timestamp__date = Date).order_by('timestamp').values()))
-    #     print(df)
-    #     x = []
-    #     df['AcX'] = df['AcX'].astype('int')
-    #     df['AcY'] = df['AcY'].astype('int')
-    #     df['AcZ'] = df['AcZ'].astype('int')
-
-    #     for index, row in df.iterrows():
-    #         x.append(math.sqrt(row['AcX']**2 + row['AcY']**2 + row['AcY']**2))
-            
-    #     df['Magnitude'] = x
-    #     df['Magnitude'] = df['Magnitude']/2048
-
-    #     # Convert the datetime column to a datetime object
-    #     df['Timestamp'] = pd.to_datetime(df['timestamp'])
-
-    #     time = df['Timestamp'].values
-
-    #     # Calculate the sample rate and total time
-    #     sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
-    #     total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 's')))
-    #     # print(" total_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
-        
-    #     sleep_data['total_time'] = str(datetime.timedelta(seconds=total_time))
-        
-    #     df = df[df['OCC'].astype(int) == 1].reset_index()
-    #     # Extract the time data from the DataFrame
-    #     time = df['Timestamp'].values
-
-    #     # Calculate the sample rate and total time
-    #     sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
-    #     total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 's')))
-    #     sleep_data['Bed_Occupancy_total_time'] = str(datetime.timedelta(seconds=total_time))
-
-    #     #Calculate the sleep time and awake time
-    #     magnitude = df['Magnitude'].values
-    #     threshold = 1
-    #     #threshold = np.mean(magnitude) + 0.5 * np.std(magnitude)
-
-    #     sleep_time = len(np.where(magnitude < threshold)[0]) * sample_rate // 1000
-    #     awake_time = total_time // 1000 - sleep_time
-
-    #     # Calculate the movement duration, frequency, and timestamps
-    #     magnitude_diff = np.abs(np.diff(magnitude))
-    #     magnitude_diff[magnitude_diff < np.mean(magnitude_diff)] = 0
-    #     magnitude_diff[magnitude_diff > 0] = 1
-    #     move_timestamps = np.where(magnitude_diff == 1)[0] * sample_rate // 1000
-    #     move_duration = np.median(np.diff(move_timestamps))
-    #     move_freq = len(move_timestamps) / awake_time
-
-    #     # # Print the results
-    #     print("Bed_Occupancy_total_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
-    #     print(" sample_rate :", sample_rate)
-    #     print(" sleep_time : %ds ; %shr: " %(sleep_time, str(datetime.timedelta(seconds=sleep_time)) ))
-    #     print(" awake_time : %ds ; %shr: " %(awake_time, str(datetime.timedelta(seconds=awake_time)) ))
-    #     #print(" move_duration : %ds ; %dhr: " %(move_duration, move_duration/(60*60) ))
-    #     #print(" move_freq:", move_freq)
-        
-        
-
-
-    #     sleep_data['sample_rate'] = sample_rate
-    #     sleep_data['sleep_time'] = str(datetime.timedelta(seconds=sleep_time))
-    #     sleep_data['awake_time'] = str(datetime.timedelta(seconds=awake_time))
-    #     sleep_data['Sleep Score'] = sleep_time/awake_time
-        
-    #     jsonapidata = json.dumps(sleep_data)
-    #     return HttpResponse(jsonapidata)
+   
     return HttpResponse('ok')
 
