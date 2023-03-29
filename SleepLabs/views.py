@@ -246,7 +246,38 @@ def timestampKey(t, d, id):
         time = time - datetime.timedelta(milliseconds=250)
 
     return d
-         
+
+def sleep_labs_graph_api_v2(request):
+
+    
+    #Fetch All
+    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.all().values())
+
+    #Fetch certain date
+    #date_str = '2023-03-29'
+    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__startswith=date_str).values())
+
+    #Fetch from a certain timestamp
+
+    date_str_start = '2023-03-29'
+    date_str_end = '2023-03-29'
+    start_time_str = '16:00:00'
+    end_time_str = '17:00:00'
+
+    start_datetime_str = date_str_end + ' ' + start_time_str
+    end_datetime_str = date_str_end + ' ' + end_time_str
+
+    df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
+
+    print("Fetching the raw dataframe :")
+    print(df)
+
+    df.to_csv('./rawData.csv')
+
+   
+    return HttpResponse('ok')
+
+
 
 def processSleepData(df) :
     df = pd.read_csv('./rawData.csv')
@@ -288,6 +319,8 @@ def algo(request) :
 
     df = pd.read_csv('./processedData.csv')
 
+    sleep_data = {}
+
     df = df[::-1]
     x = []
     df['AcX'] = df['AcX'].astype('int')
@@ -300,44 +333,35 @@ def algo(request) :
     df['Magnitude'] = x
     df['Magnitude'] = df['Magnitude']/2048
 
-    # Convert the datetime column to a datetime object
+    # Total Time and Sample Rate Calculation
     df['Timestamp'] = pd.to_datetime(df['time'])
-
     time = df['Timestamp'].values
-
-    #print(df)
-    # Calculate the sample rate and total time
     sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
     total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
-
     total_time_s = round(total_time/1000)
-
-    print("total_time : %ds ; %shr: " %(total_time_s, str(datetime.timedelta(seconds=total_time_s)) ))
-    #print("total_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
+    print("total_time : %ds ; %shr: " %(total_time_s, str(datetime.timedelta(seconds=total_time_s))))
     print("total sample_rate:",sample_rate)
+    sleep_data['total_time'] =  str(datetime.timedelta(seconds=total_time_s))
+    sleep_data['sample_rate'] =  sample_rate
     
-    #sleep_data['total_time'] = str(datetime.timedelta(seconds=total_time))
-    
-    #df = df[df['Occ'].astype(int) == 1].reset_index()
-    # Extract the time data from the DataFrame
+
+    # Bed Occupancy Calculations
+    df = df[df['Occ'].astype(int) == 1].reset_index()
     time = df['Timestamp'].values
+    bedOccupantTime = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
+    bedOccupantTime_s = round(bedOccupantTime/1000)
+    print("Bed Ocupant Time : %ss ; %shr: " %(bedOccupantTime_s, str(datetime.timedelta(seconds=bedOccupantTime_s)) ))
+    sleep_data['bedOccupantTime'] =  str(datetime.timedelta(seconds=bedOccupantTime_s))
 
-    # Calculate the sample rate and total time
-    #sleep_sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
-    total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
-    print("sleep_time : %sms ; %shr: " %(total_time, round ((total_time/(60*60*1000)),2)))
-    #print("sleep sample_rate:",sample_rate)
-    #sleep_data['Bed_Occupancy_total_time'] = str(datetime.timedelta(seconds=total_time))
-
-    #Calculate the sleep time and awake time
+    # Sleep Time and Awake Time Calculations
+    total_time = bedOccupantTime
     magnitude = df['Magnitude'].values
     threshold = 1
-    #threshold = np.mean(magnitude) + 0.5 * np.std(magnitude)
+
 
     sleep_time = len(np.where(magnitude < threshold)[0]) * sample_rate // 1000
     awake_time = total_time // 1000 - sleep_time
 
-    # Calculate the movement duration, frequency, and timestamps
     magnitude_diff = np.abs(np.diff(magnitude))
     magnitude_diff[magnitude_diff < np.mean(magnitude_diff)] = 0
     magnitude_diff[magnitude_diff > 0] = 1
@@ -348,36 +372,11 @@ def algo(request) :
 
     print("sleep_time : %ds ; %shr: " %(sleep_time, str(datetime.timedelta(seconds=sleep_time)) ))
     print("awake_time : %ds ; %shr: " %(awake_time, str(datetime.timedelta(seconds=awake_time)) ))
-    print("Move Timestamp", move_timestamps)
 
-    return HttpResponse('ok')
+    sleep_data['sleep_time'] =  str(datetime.timedelta(seconds=sleep_time))
+    sleep_data['awake_time'] =  str(datetime.timedelta(seconds=awake_time))
 
-def sleep_labs_graph_api_v2(request):
 
-    
-    #Fetch All
-    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.all().values())
 
-    #Fetch certain date
-    #date_str = '2023-03-29'
-    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__startswith=date_str).values())
-
-    #Fetch from a certain timestamp
-
-    date_str = '2023-03-28'
-    start_time_str = '21:00:00'
-    end_time_str = '23:59:00'
-
-    start_datetime_str = date_str + ' ' + start_time_str
-    end_datetime_str = date_str + ' ' + end_time_str
-
-    df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
-
-    print("Fetching the raw dataframe :")
-    print(df)
-
-    df.to_csv('./rawData.csv')
-
-   
     return HttpResponse('ok')
 
