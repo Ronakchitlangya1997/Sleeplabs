@@ -142,25 +142,7 @@ def sleep_labs_graph_api(request):
         return HttpResponse(jsonapidata)
     return HttpResponse('not working')
 
-  #print(" move_timestamps (s): ", move_timestamps)
 
-        # move_timestamps_hrs = move_timestamps / 3600
-        # my_formatted_list = [ '%.2f' % elem for elem in move_timestamps_hrs ]
-        # print(" move_timestamps (hrs) :", my_formatted_list)
-        # for index, row in df.iterrows():
-        #     x.append(math.sqrt(row['AcX']**2 + row['AcY']**2 + row['AcY']**2))
-        # df['Mag'] = x
-        # df['accel_mag'] = (df['Mag'] / 2048).round(2)
-        # df = df[df['accel_mag'] > 1]
-        # print(df)
-        # for index, row in df.iterrows():
-        #     timedate = str(row['timestamp'])
-        #     split_timedate = timedate.split('.')
-        #     dict_data = {'x_axis': split_timedate[0], 'acxdata' : int(row['AcX']), 'acydata' : int(row['AcY']), 
-        #                 'aczdata' : int(row['AcZ']), 'gyzdata' : int(row['GyZ']), 'gyxdata' : int(row['GyX']), 
-        #                 'gyydata' : int(row['GyY']), 'occdata': int(row['OCC']), 'accmag': row['accel_mag']}
-        #     full_data.append(dict_data)
-#Add the following at line 32
 @csrf_exempt
 def deviceData(request):
 
@@ -176,36 +158,7 @@ def deviceData(request):
         deviceID = bodyJson['DeviceID']
         print('Received data from ' + deviceID)
 
-        # time = now
-
-
         time = now
-        # for i in range(len(bodyJson) - 1):
-
-        #     sample = 'S' + str(len(bodyJson) - 1 - i -1)
-        #     print(sample)
-        #     #print(time)
-        #     # acX = bodyJson[sample]['AcX']
-        #     # acY = bodyJson[sample]['AcY']
-        #     # acZ = bodyJson[sample]['AcZ']
-        #     # gyX = bodyJson[sample]['GyX']
-        #     # gyY = bodyJson[sample]['GyY']
-        #     # gyZ = bodyJson[sample]['GyZ']
-        #     # occ = bodyJson[sample]['Occ']
-
-        #     packetTime = time
-        #     bodyJson[sample]['time'] = packetTime.strftime("%d/%m/%Y %H:%M:%S.%f")
-
-        #     time = time - datetime.timedelta(milliseconds=250)
-        #     print(packetTime)
-            
-            
-        #     # dataSample = SleepLab(AcX=acX, AcY=acY, AcZ=acZ, GyX=gyX, GyY=gyY, GyZ=gyZ, OCC=occ, DevID=deviceID, timestamp=time)
-        #     # dataSample.save()
-        #     # time = time - datetime.timedelta(milliseconds=250)
-        
-        # print(bodyJson)
-
         dataSample = SleepLabOptv1(DevID=deviceID, timestamp=time,jsonData=bodyJson)
         dataSample.save()
 
@@ -280,6 +233,7 @@ def sleep_labs_graph_api_v2(request):
 
         print("Fetching the raw dataframe :")
         print(df)
+        
 
         df.to_csv('./rawData.csv')
         processSleep_Data = processSleepData()
@@ -291,8 +245,41 @@ def sleep_labs_graph_api_v2(request):
     return HttpResponse('ok')
 
 
+def sleep_labs_graph_api_v3(request):
 
-def processSleepData() :
+    
+    #Fetch All
+    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.all().values())
+
+    #Fetch certain date
+    #date_str = '2023-03-29'
+
+    date_str_start = '2023-03-29'
+    date_str_end = '2023-03-29'
+    start_time_str = '17:00:00'
+    end_time_str = '18:00:00'
+
+    #Fetch from a certain timestamp
+
+    start_datetime_str = date_str_end + ' ' + start_time_str
+    end_datetime_str = date_str_end + ' ' + end_time_str
+
+    df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
+
+    print("Fetching the raw dataframe :")
+    print(df)
+    
+
+    df.to_csv('./rawData.csv')
+    # processSleep_Data = processSleepData()
+
+    # algo_Data = algo()
+    
+    return HttpResponse('ok')
+   
+
+
+def processSleepData(request) :
     df = pd.read_csv('./rawData.csv')
 
     df['jsonData'] = df['jsonData'].apply(converStringToDict)
@@ -333,7 +320,18 @@ def algo(request) :
     df = pd.read_csv('./processedData.csv')
 
 
-    print("Running the algorithm .........")
+    print("Running the algorithm .............................")
+
+    # From Frontend 
+    bedOccToggleOne = 1
+    bedOccToggleTwo = 0
+    bedOccThresholdOne = 1.1
+    bedOccThresholdTwo = 1.1
+
+    print("Bed Occupancy Inputs :")
+    print(f"Sensor-1 :: Toggle ; Threshold : {bedOccToggleOne} ; {bedOccThresholdOne}")
+    print(f"Sensor-2 :: Toggle ; Threshold : {bedOccToggleTwo} ; {bedOccThresholdTwo}")
+
 
     sleep_data = {}
 
@@ -355,16 +353,34 @@ def algo(request) :
     sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
     total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
     total_time_s = round(total_time/1000)
+
+    print("Sleep Calculations :")
     print("Total Time : %ds ; %s hr " %(total_time_s, str(datetime.timedelta(seconds=total_time_s))))
-    print("Sample Rate:",sample_rate)
+    print("Sample Rate: %ds" %(sample_rate))
     sleep_data['total_time'] =  str(datetime.timedelta(seconds=total_time_s))
     sleep_data['sample_rate'] =  sample_rate
     
 
+
     # Bed Occupancy Calculations
-    df = df[df['Occ'].astype(int) == 1].reset_index()
+    if bedOccToggleOne == 1 and bedOccToggleTwo == 1:
+        df = df[(df['OcV'].astype(float) < bedOccThresholdOne) & (df['OcV2'].astype(float) < bedOccThresholdTwo)].reset_index()
+    elif bedOccToggleOne == 1:
+        df = df[df['OcV'].astype(float) < bedOccThresholdOne].reset_index()
+    elif bedOccToggleTwo == 1:
+        df = df[df['OcV2'].astype(float) < bedOccThresholdTwo].reset_index()
+    else:
+        # Both toggles are inactive
+        pass
+
     time = df['Timestamp'].values
-    bedOccupantTime = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
+    
+    try :
+        bedOccupantTime = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
+    except :
+        print("No Occupant Activity")
+        bedOccupantTime = 0
+
     bedOccupantTime_s = round(bedOccupantTime/1000)
     print("Bed Occupant Time : %ss ; %s hr " %(bedOccupantTime_s, str(datetime.timedelta(seconds=bedOccupantTime_s)) ))
     sleep_data['bedOccupantTime'] =  str(datetime.timedelta(seconds=bedOccupantTime_s))
@@ -378,12 +394,12 @@ def algo(request) :
     sleep_time = len(np.where(magnitude < threshold)[0]) * sample_rate // 1000
     awake_time = total_time // 1000 - sleep_time
 
-    magnitude_diff = np.abs(np.diff(magnitude))
-    magnitude_diff[magnitude_diff < np.mean(magnitude_diff)] = 0
-    magnitude_diff[magnitude_diff > 0] = 1
-    move_timestamps = np.where(magnitude_diff == 1)[0] * sample_rate // 1000
-    move_duration = np.median(np.diff(move_timestamps))
-    move_freq = len(move_timestamps) / awake_time
+    # magnitude_diff = np.abs(np.diff(magnitude))
+    # magnitude_diff[magnitude_diff < np.mean(magnitude_diff)] = 0
+    # magnitude_diff[magnitude_diff > 0] = 1
+    # move_timestamps = np.where(magnitude_diff == 1)[0] * sample_rate // 1000
+    # move_duration = np.median(np.diff(move_timestamps))
+    #move_freq = len(move_timestamps) / awake_time
 
 
     print("Sleep Time : %ds ; %s hr " %(sleep_time, str(datetime.timedelta(seconds=sleep_time)) ))
@@ -392,15 +408,23 @@ def algo(request) :
     sleep_data['sleep_time'] =  str(datetime.timedelta(seconds=sleep_time))
     sleep_data['awake_time'] =  str(datetime.timedelta(seconds=awake_time))
 
-    Sleep_info = "Of the" + " " + str(sleep_data['total_time']) + " " "of monitoring :" + "\n" + "You slept for" + " " + str(int((bedOccupantTime_s/total_time_s)*100)) + "%" + " " + "of the time." + "\n" + "Your pillow was unoccupied for" + " " + str(int(100- int((bedOccupantTime_s/total_time_s)*100))) +"%"+ " of the time." + "\n" + "You slept restfully for" + " " + str(int(sleep_time/(awake_time+sleep_time))*100) + "%" + " of the entire sleep duration."
+    if total_time_s == 0 or awake_time+sleep_time == 0 :
+        print("In the if statement of Zero Checks")
+        print("Bed Occupant Time is", awake_time+sleep_time)
+        Sleep_info = "Summary Not Available"
+    
+    else :
+        Sleep_info = "Of the" + " " + str(sleep_data['total_time']) + " " "of monitoring :" + "\n" + "You slept for" + " " + str(int((bedOccupantTime_s/total_time_s)*100)) + "%" + " " + "of the time." + "\n" + "Your pillow was unoccupied for" + " " + str(int(100- int((bedOccupantTime_s/total_time_s)*100))) +"%"+ " of the time." + "\n" + "You slept restfully for" + " " + str( int((sleep_time/(awake_time+sleep_time))*100) ) + "%" + " of the entire sleep duration."
     
     sleep_data['Sleep_info'] = Sleep_info
 
+    print(Sleep_info)
     # Get from front-end otherwise default as following :
     rationIndexes = [0.9, 0.8, 0.7, 0.6]
 
     Sleep_ratio, Sleep_star, Sleep_quality = getSleepRating(sleep_time, awake_time,rationIndexes)
     
+    print("Sleep Quality Outputs :")
     print("Sleep Ratio :", Sleep_ratio)
     print("Sleep Star :", Sleep_star)
     print("Sleep Quality :", Sleep_quality)
@@ -409,7 +433,7 @@ def algo(request) :
     sleep_data['Sleep_star'] = Sleep_star
     sleep_data['Sleep_quality'] = Sleep_quality
 
-    print("Analysis Complete .........")
+    print("Analysis Complete ...................................")
 
     jsonapidata = json.dumps(sleep_data)
 
@@ -417,23 +441,28 @@ def algo(request) :
 
 def getSleepRating(sleep_time, awake_time,rationIndexes):
 
-    total_time = sleep_time + awake_time
-    sleep_ratio = round(sleep_time / total_time,2)
-    
-    if sleep_ratio >= rationIndexes[0]:
-        rating = 5
-        quality = "Excellent"
-    elif sleep_ratio >= rationIndexes[1]:
-        rating = 4
-        quality = "Good"
-    elif sleep_ratio >= rationIndexes[2]:
-        rating = 3
-        quality = "Fair"
-    elif sleep_ratio >= rationIndexes[3]:
-        rating = 2
-        quality = "Poor"
-    else:
-        rating = 1
-        quality = "Very poor"
-    
+    try :
+        total_time = sleep_time + awake_time
+        sleep_ratio = round(sleep_time / total_time,2)
+        
+        if sleep_ratio >= rationIndexes[0]:
+            rating = 5
+            quality = "Excellent"
+        elif sleep_ratio >= rationIndexes[1]:
+            rating = 4
+            quality = "Good"
+        elif sleep_ratio >= rationIndexes[2]:
+            rating = 3
+            quality = "Fair"
+        elif sleep_ratio >= rationIndexes[3]:
+            rating = 2
+            quality = "Poor"
+        else:
+            rating = 1
+            quality = "Very poor"
+    except :
+        rating = -1
+        sleep_ratio = -1
+        quality = "NA"
+        
     return sleep_ratio, rating, quality
