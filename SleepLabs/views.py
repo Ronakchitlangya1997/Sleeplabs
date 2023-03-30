@@ -328,9 +328,12 @@ def processSleepData() :
 
     return HttpResponse('ok')
 
-def algo() :
+def algo(request) :
 
     df = pd.read_csv('./processedData.csv')
+
+
+    print("Running the algorithm .........")
 
     sleep_data = {}
 
@@ -352,8 +355,8 @@ def algo() :
     sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
     total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
     total_time_s = round(total_time/1000)
-    print("total_time : %ds ; %shr: " %(total_time_s, str(datetime.timedelta(seconds=total_time_s))))
-    print("total sample_rate:",sample_rate)
+    print("Total Time : %ds ; %s hr " %(total_time_s, str(datetime.timedelta(seconds=total_time_s))))
+    print("Sample Rate:",sample_rate)
     sleep_data['total_time'] =  str(datetime.timedelta(seconds=total_time_s))
     sleep_data['sample_rate'] =  sample_rate
     
@@ -363,7 +366,7 @@ def algo() :
     time = df['Timestamp'].values
     bedOccupantTime = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
     bedOccupantTime_s = round(bedOccupantTime/1000)
-    print("Bed Ocupant Time : %ss ; %shr: " %(bedOccupantTime_s, str(datetime.timedelta(seconds=bedOccupantTime_s)) ))
+    print("Bed Occupant Time : %ss ; %s hr " %(bedOccupantTime_s, str(datetime.timedelta(seconds=bedOccupantTime_s)) ))
     sleep_data['bedOccupantTime'] =  str(datetime.timedelta(seconds=bedOccupantTime_s))
 
     # Sleep Time and Awake Time Calculations
@@ -383,21 +386,54 @@ def algo() :
     move_freq = len(move_timestamps) / awake_time
 
 
-    print("sleep_time : %ds ; %shr: " %(sleep_time, str(datetime.timedelta(seconds=sleep_time)) ))
-    print("awake_time : %ds ; %shr: " %(awake_time, str(datetime.timedelta(seconds=awake_time)) ))
+    print("Sleep Time : %ds ; %s hr " %(sleep_time, str(datetime.timedelta(seconds=sleep_time)) ))
+    print("Awake Time : %ds ; %s hr " %(awake_time, str(datetime.timedelta(seconds=awake_time)) ))
 
     sleep_data['sleep_time'] =  str(datetime.timedelta(seconds=sleep_time))
     sleep_data['awake_time'] =  str(datetime.timedelta(seconds=awake_time))
-    Sleep_info = "Plz provide sleep info in backend"
+
+    Sleep_info = "Of the" + " " + str(sleep_data['total_time']) + " " "of monitoring :" + "\n" + "You slept for" + " " + str(int((bedOccupantTime_s/total_time_s)*100)) + "%" + " " + "of the time." + "\n" + "Your pillow was unoccupied for" + " " + str(int(100- int((bedOccupantTime_s/total_time_s)*100))) +"%"+ " of the time." + "\n" + "You slept restfully for" + " " + str(int(sleep_time/(awake_time+sleep_time))*100) + "%" + " of the entire sleep duration."
+    
     sleep_data['Sleep_info'] = Sleep_info
-    Sleep_star = 2
+
+    # Get from front-end otherwise default as following :
+    rationIndexes = [0.9, 0.8, 0.7, 0.6]
+
+    Sleep_ratio, Sleep_star, Sleep_quality = getSleepRating(sleep_time, awake_time,rationIndexes)
+    
+    print("Sleep Ratio :", Sleep_ratio)
+    print("Sleep Star :", Sleep_star)
+    print("Sleep Quality :", Sleep_quality)
+    
+    sleep_data['Sleep_ratio'] = Sleep_ratio
     sleep_data['Sleep_star'] = Sleep_star
-    Sleep_quality = "Bad"
     sleep_data['Sleep_quality'] = Sleep_quality
 
-
-
+    print("Analysis Complete .........")
 
     jsonapidata = json.dumps(sleep_data)
+
     return HttpResponse(jsonapidata)
 
+def getSleepRating(sleep_time, awake_time,rationIndexes):
+
+    total_time = sleep_time + awake_time
+    sleep_ratio = round(sleep_time / total_time,2)
+    
+    if sleep_ratio >= rationIndexes[0]:
+        rating = 5
+        quality = "Excellent"
+    elif sleep_ratio >= rationIndexes[1]:
+        rating = 4
+        quality = "Good"
+    elif sleep_ratio >= rationIndexes[2]:
+        rating = 3
+        quality = "Fair"
+    elif sleep_ratio >= rationIndexes[3]:
+        rating = 2
+        quality = "Poor"
+    else:
+        rating = 1
+        quality = "Very poor"
+    
+    return sleep_ratio, rating, quality
