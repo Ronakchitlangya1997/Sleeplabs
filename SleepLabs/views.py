@@ -264,20 +264,32 @@ def sleep_labs_graph_api_v3(request):
     start_datetime_str = date_str_end + ' ' + start_time_str
     end_datetime_str = date_str_end + ' ' + end_time_str
 
-    df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
+    if request.method == "POST":
+        sleep_data = {}
+        jsondata = json.loads(request.body)
+        date_str_start = jsondata['Date']
+        date_str_end = jsondata['Date']
+        start_time_str = jsondata['StartTimehours']+":"+jsondata['StartTimemin']+":"+jsondata['StartTimesec']
+        end_time_str = jsondata['EndTimehours']+":"+jsondata['EndTimemin']+":"+jsondata['EndTimesec']
 
-    print("Fetching the raw dataframe :")
-    print(df)
+        print(date_str_start, date_str_end, start_time_str, end_time_str)
+        # date_str_start = '2023-03-29'
+        # date_str_end = '2023-03-29'
+        # start_time_str = '16:00:00'
+        # end_time_str = '17:00:00'
+
+        start_datetime_str = date_str_end + ' ' + start_time_str
+        end_datetime_str = date_str_end + ' ' + end_time_str
+
+        df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
+
+        print("Fetching the raw dataframe :")
+        print(df)
+        
+        algo_Data = processSleepData(df)
+
+        return HttpResponse(algo_Data)
     
-    processSleepData(df)
-
-    #df.to_csv('./rawData.csv')
-    # processSleep_Data = processSleepData()
-
-    algo_Data = algo()
-    
-    return HttpResponse(algo_Data)
-    #return HttpResponse('ok')
    
 
 
@@ -317,10 +329,10 @@ def processSleepData(df) :
 
     print(df_new)
 
-    algo(df_new)
+    jsonapidata = algo(df_new)
     #df_new.to_csv('./processedData.csv')
 
-    return HttpResponse('ok')
+    return jsonapidata
 
 def algo(df) :
 
@@ -444,7 +456,7 @@ def algo(df) :
 
     jsonapidata = json.dumps(sleep_data)
 
-    return HttpResponse(jsonapidata)
+    return jsonapidata
 
 def getSleepRating(sleep_time, awake_time,rationIndexes):
 

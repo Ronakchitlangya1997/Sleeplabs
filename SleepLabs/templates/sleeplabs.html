@@ -609,8 +609,9 @@ tr:nth-child(odd) {
 			let dateDD = document.getElementById('dateDD').value.toString().padStart(2, '0');
 			let dateMM = document.getElementById('dateMM').value.toString().padStart(2, '0');
 			let dateYY = document.getElementById('dateYY').value.toString();
-			let dateStr = dateMM + '/' + dateDD + '/' + dateYY;
-
+			let dateStr = dateYY + '-' + dateMM + '-' + dateDD;
+			
+			console.log(dateStr)
 			//console.log(dateDD + '/' + dateMM + '/' + dateYY);
 
 			//"Date":formData.get('datepicker')
