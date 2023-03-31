@@ -254,10 +254,10 @@ def sleep_labs_graph_api_v3(request):
     #Fetch certain date
     #date_str = '2023-03-29'
 
-    date_str_start = '2023-03-29'
-    date_str_end = '2023-03-29'
-    start_time_str = '17:00:00'
-    end_time_str = '18:00:00'
+    date_str_start = '2023-03-31'
+    date_str_end = '2023-03-31'
+    start_time_str = '00:00:00'
+    end_time_str = '08:00:00'
 
     #Fetch from a certain timestamp
 
@@ -269,8 +269,9 @@ def sleep_labs_graph_api_v3(request):
     print("Fetching the raw dataframe :")
     print(df)
     
+    processSleepData(df)
 
-    df.to_csv('./rawData.csv')
+    #df.to_csv('./rawData.csv')
     # processSleep_Data = processSleepData()
 
     # algo_Data = algo()
@@ -279,10 +280,14 @@ def sleep_labs_graph_api_v3(request):
    
 
 
-def processSleepData(request) :
-    df = pd.read_csv('./rawData.csv')
+def processSleepData(df) :
+    #df = pd.read_csv('./rawData.csv')
 
-    df['jsonData'] = df['jsonData'].apply(converStringToDict)
+    df = pd.DataFrame(df)
+    print(df)
+    print(df.dtypes)
+
+    #df['jsonData'] = df['jsonData'].apply(converStringToDict)
 
     df['dict_len'] = df['jsonData'].apply(dict_len)
 
@@ -311,19 +316,20 @@ def processSleepData(request) :
 
     print(df_new)
 
-    df_new.to_csv('./processedData.csv')
+    algo(df_new)
+    #df_new.to_csv('./processedData.csv')
 
     return HttpResponse('ok')
 
-def algo(request) :
+def algo(df) :
 
-    df = pd.read_csv('./processedData.csv')
+    #df = pd.read_csv('./processedData.csv')
 
 
     print("Running the algorithm .............................")
 
     # From Frontend 
-    bedOccToggleOne = 1
+    bedOccToggleOne = 0
     bedOccToggleTwo = 0
     bedOccThresholdOne = 1.1
     bedOccThresholdTwo = 1.1
