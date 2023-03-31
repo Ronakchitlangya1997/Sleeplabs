@@ -349,10 +349,18 @@ tr:nth-child(odd) {
 			<div class="d-flex flex-column mt-2">
 				<label class="datetimeFormLabel">Select Date</label>
 				<div class="d-flex">
-					<input class="datetimeFormInput" id="datepicker" name="datepicker" placeholder="Select Date" autocomplete="off">
+					<!-- <input class="datetimeFormInput" id="datepicker" name="datepicker" placeholder="Select Date" autocomplete="off"> -->
+					
+					<input class='datetimeFormInput' type="number" id="dateDD" name="dateDD" min=01 max=31 step=1 value=01>
+					<span class="datetimeinputspan">/</span>
+					<input  class='datetimeFormInput' type="number" id="dateMM" name="dateMM" min=01 max=12 step=1 value=01>
+					<span class="datetimeinputspan">/</span>
+					<input class='datetimeFormInput' type="number" id="dateYY" name="dateYY" min=2023 max=2050 step=1 value=2023>
+
 					<span class="input-group-addon">
 						<span class="glyphicon glyphicon-calendar"></span>
 					</span>
+					<label class= "sublabelheading" >DD:MM:YYYY</label>
 				</div>
 			</div>
 
@@ -513,7 +521,7 @@ tr:nth-child(odd) {
 	var sleepdata;
 	function fetchsleeplabsdata(value){
 		console.log('value', value)
-	  fetch('/sleep_labs_graph_api_v2', {
+	  fetch('/sleep_labs_graph_api_v3/', {
 		method: "POST",
 		credentials: "same-origin",
 		headers: {
@@ -598,7 +606,15 @@ tr:nth-child(odd) {
 			event.preventDefault();
 
 			const formData = new FormData(form);
-			datajson = {"Date":formData.get('datepicker'), "StartTimehours": formData.get('StartTimehours'), 
+			let dateDD = document.getElementById('dateDD').value.toString().padStart(2, '0');
+			let dateMM = document.getElementById('dateMM').value.toString().padStart(2, '0');
+			let dateYY = document.getElementById('dateYY').value.toString();
+			let dateStr = dateMM + '/' + dateDD + '/' + dateYY;
+
+			//console.log(dateDD + '/' + dateMM + '/' + dateYY);
+
+			//"Date":formData.get('datepicker')
+			datajson = {"Date":dateStr, "StartTimehours": formData.get('StartTimehours'), 
 						"StartTimemin":formData.get('StartTimemin'), "StartTimesec":formData.get('StartTimesec'),
 						'EndTimehours': formData.get('EndTimehours'), 'EndTimemin': formData.get('EndTimemin'),
 						'EndTimesec': formData.get('EndTimesec')	

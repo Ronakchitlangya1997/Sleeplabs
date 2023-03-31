@@ -274,9 +274,10 @@ def sleep_labs_graph_api_v3(request):
     #df.to_csv('./rawData.csv')
     # processSleep_Data = processSleepData()
 
-    # algo_Data = algo()
+    algo_Data = algo()
     
-    return HttpResponse('ok')
+    return HttpResponse(algo_Data)
+    #return HttpResponse('ok')
    
 
 
