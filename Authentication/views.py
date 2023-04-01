@@ -28,7 +28,7 @@ def login(request):
         # print(user)
         if user is not None:   
             UserLogin(request, user)
-            return redirect('/home') 
+            return redirect('/') 
         else:    
             messages.error(request, 'Username OR password is incorrect!')
     return render(request, 'login.html')

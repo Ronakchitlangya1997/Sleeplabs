@@ -235,7 +235,106 @@ tr:nth-child(odd) {
 				position: fixed;
 				top: 0px;
 				opacity: 0.7;
-				margin-left: -120px;
+				left: 0px
+			}
+			.star{
+				font-size: 750%;
+			}
+			
+			@media screen and (max-width: 1100px) {
+				.mainContainer{
+					margin: 0px 20px 0px 20px;
+				}
+				.logoutbtn {
+					margin-right: 20px;
+				}
+				.dashboardleadsinfobox {
+					width: 350px;
+				}
+			}
+
+			@media screen and (max-width: 750px) {
+				.dashboardleadsinfobox {
+					width: 300px;
+				}
+			}
+
+			@media screen and (max-width: 550px) {
+				.mainContainer{
+					margin: 0px 10px 0px 0px;
+				}
+				.logoutbtn {
+					margin-right: 10px;
+				}
+				.star{
+				font-size: 550%;
+				}
+				.dashboardBoxHeading{
+					margin-top: 13px;
+    				font-size: 26px;
+
+				}
+				.logoutbtntxt{
+					display: none;
+				}
+							
+				.datetimeForm {
+					width: 410px;
+				}
+			}
+			@media screen and (max-width: 410px) {
+				.mainContainer{
+					margin: 0px 0px 0px 0px;
+				}
+				.logoutbtn {
+					margin-right: 0px;
+				}
+				.star{
+				font-size: 550%;
+				}
+				.dashboardBoxHeading{
+					margin-top: 15px;
+    				font-size: 22px;
+    				width: 210px;
+				}
+				.selectnewdatetimeBtn{
+					width: 150px;
+    				padding: 9px;
+				}
+				.logoutbtntxt{
+					display: none;
+				}
+				.selectdatetimeFormsubId {
+					padding: 30px 10px 30px 10px;
+				}
+				.datetimeForm {
+					width: 370px;
+				}
+			}
+			@media screen and (max-width: 330px) {
+				.mainContainer{
+					margin: 0px 0px 0px 0px;
+				}
+				.logoutbtn {
+					margin-right: 0px;
+				}
+				.star{
+				font-size: 500%;
+				}
+				.dashboardBoxHeading{
+					font-size: 18px;
+					margin-top: 20px;
+				}
+				.selectnewdatetimeBtn{
+					width: 150px;
+    				padding: 9px;
+				}
+				.logoutbtntxt{
+					display: none;
+				}
+				.datetimeForm {
+					width: 315px;
+				}
 			}
 </style>
 
@@ -261,11 +360,11 @@ tr:nth-child(odd) {
 </div>
 
 <div class="d-flex justify-content-center">
-<span id="star1" style="font-size:750%;">&starf;</span>
-<span id="star2" style="font-size:750%;">&starf;</span>
-<span id="star3" style="font-size:750%;">&starf;</span>
-<span id="star4" style="font-size:750%;">&starf;</span>
-<span id="star5" style="font-size:750%;">&starf;</span>
+	<span id="star1" class="star">&starf;</span>
+	<span id="star2" class="star">&starf;</span>
+	<span id="star3" class="star">&starf;</span>
+	<span id="star4" class="star">&starf;</span>
+	<span id="star5" class="star">&starf;</span>
 </div>
 
 <h3 class="text-center">Your sleep quality last night was </h3>
@@ -343,7 +442,7 @@ tr:nth-child(odd) {
 	<div class="selectdatetimeFormsubId">
 		<div class="d-flex">
 			<p class="datetimeFormHeading">Select Date Time</p>
-			<div class="material-icons" onclick="opencloseaddnewdatetimeForm()" style="margin-left: auto; margin-top:5px;">clear</div>
+			<div class="material-icons" onclick="opencloseaddnewdatetimeForm()" style="cursor:pointer; margin-left: auto; margin-top:5px;">clear</div>
 		</div>
 		<form method="POST" id="selectdatetimeform" enctype="multipart/form-data">{% csrf_token %}
 			<div class="d-flex flex-column mt-2">
@@ -367,7 +466,7 @@ tr:nth-child(odd) {
 			<div class="d-flex flex-column mt-2">
 				<label class= "datetimeFormLabel">Start Time  :</label>
 				<div class="d-flex">
-					<input class='datetimeFormInput' type="number" id="StartTimehours" name="StartTimehours" min=00 max=24 step=1 value=12>
+					<input class='datetimeFormInput' type="number" id="StartTimehours" name="StartTimehours" min=00 max=24 step=1 value=00>
 					<span class="datetimeinputspan">:</span>
 					<input  class='datetimeFormInput' type="number" id="StartTimemin" name="StartTimemin" min=00 max=60 step=1 value=00>
 					<span class="datetimeinputspan">:</span>
@@ -379,9 +478,9 @@ tr:nth-child(odd) {
 			<div class="d-flex flex-column mt-2">
 				<label class= "datetimeFormLabel">End Time  :</label>
 				<div class="d-flex">
-					<input class='datetimeFormInput' type="number" id="EndTimehours" name="EndTimehours" min=00 max=24 step=1 value=12 >
+					<input class='datetimeFormInput' type="number" id="EndTimehours" name="EndTimehours" min=00 max=24 step=1 value=23 >
 					<span class="datetimeinputspan">:</span>
-					<input  class='datetimeFormInput' type="number" id="EndTimemin" name="EndTimemin" min=000 max=60 step=1 value=00 >
+					<input  class='datetimeFormInput' type="number" id="EndTimemin" name="EndTimemin" min=000 max=60 step=1 value=59 >
 					<span class="datetimeinputspan">:</span>
 					<input class='datetimeFormInput' type="number" id="EndTimesec" name="EndTimesec" min=00 max=60 step=1 value=00>
 					<label class= "sublabelheading" >H:M:S</label>
@@ -390,7 +489,7 @@ tr:nth-child(odd) {
 
 			<hr class="mt-4 mb-0">
 
-			<button class="addNewdatetimeFormSubmitBtn" id='submitdatetime'>Submit</button>
+			<button class="addNewdatetimeFormSubmitBtn" id='submitdatetime' onclick="EnableLoadingBarGif()">Submit</button>
 		</form>
 	</div>
 </div>
@@ -457,6 +556,23 @@ tr:nth-child(odd) {
 	});
 } );
 </script> -->
+
+<script>
+	var todaydatevalue = new Date
+	var date_DD = (String(todaydatevalue.getDate()));
+	var date_MM = (String(todaydatevalue.getMonth()+ 1));
+	var date_YY = (String(todaydatevalue.getFullYear()));
+	if ((String(todaydatevalue.getDate()).length) == 1){
+		date_DD = "0" + todaydatevalue.getDate()
+	}
+	if ((String(todaydatevalue.getMonth()).length) == 1){
+		date_MM = "0" + (todaydatevalue.getMonth() +1)
+	}
+	document.getElementById("dateDD").value = date_DD
+	document.getElementById("dateMM").value = date_MM
+	document.getElementById("dateYY").value = date_YY
+
+</script>
 <script>
 	var maskhover = document.getElementById('maskid');
 	
@@ -536,6 +652,7 @@ tr:nth-child(odd) {
 		document.getElementById("maskid").style.display='none'
 		document.getElementById('addNewdatetimeFormId').style.display='none'
 		sleepdata = data
+		DisableLoadingBarGif()
 		document.getElementById("star1").style.color=""
 		document.getElementById("star2").style.color=""
 		document.getElementById("star3").style.color=""
@@ -572,7 +689,15 @@ tr:nth-child(odd) {
 		sleepinfodata = data.Sleep_info
 		sleepinfo(sleepinfodata)
 
-	  });
+	  })
+	  .catch((response) => {
+		DisableLoadingBarGif()
+		document.getElementById("maskid").style.display='none'
+		document.getElementById('addNewdatetimeFormId').style.display='none'
+      	console.log(response.status, response.statusText);
+		window.alert('Invalid Inputs')
+    });
+	
 	}
   </script>
 <!-- <script>
@@ -604,21 +729,28 @@ tr:nth-child(odd) {
 
         btn.addEventListener('click', (e) => {
 			event.preventDefault();
-
 			const formData = new FormData(form);
 			let dateDD = document.getElementById('dateDD').value.toString().padStart(2, '0');
 			let dateMM = document.getElementById('dateMM').value.toString().padStart(2, '0');
 			let dateYY = document.getElementById('dateYY').value.toString();
 			let dateStr = dateYY + '-' + dateMM + '-' + dateDD;
+
+			var starttime_HH = formData.get('StartTimehours').toString().padStart(2, '0')
+			var starttime_MM = formData.get('StartTimemin').toString().padStart(2, '0')
+			var starttime_SS = formData.get('StartTimesec').toString().padStart(2, '0')
+			var endtime_HH = formData.get('EndTimehours').toString().padStart(2, '0')
+			var endtime_MM = formData.get('EndTimemin').toString().padStart(2, '0')
+			var endtime_SS = formData.get('EndTimesec').toString().padStart(2, '0')
 			
 			console.log(dateStr)
-			//console.log(dateDD + '/' + dateMM + '/' + dateYY);
+			console.log(starttime_HH + '/' + starttime_MM + '/' + starttime_SS);
+			console.log(endtime_HH + '/' + endtime_MM + '/' + endtime_SS);
 
 			//"Date":formData.get('datepicker')
-			datajson = {"Date":dateStr, "StartTimehours": formData.get('StartTimehours'), 
-						"StartTimemin":formData.get('StartTimemin'), "StartTimesec":formData.get('StartTimesec'),
-						'EndTimehours': formData.get('EndTimehours'), 'EndTimemin': formData.get('EndTimemin'),
-						'EndTimesec': formData.get('EndTimesec')	
+			datajson = {"Date":dateStr, "StartTimehours": starttime_HH, 
+						"StartTimemin":starttime_MM, "StartTimesec":starttime_SS,
+						'EndTimehours': endtime_HH, 'EndTimemin': endtime_MM,
+						'EndTimesec': endtime_SS	
 					}
 			console.log('DateTimedata', datajson)
 			fetchsleeplabsdata(datajson)

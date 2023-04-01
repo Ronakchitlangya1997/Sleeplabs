@@ -3,9 +3,9 @@ from SleepLabs.views import SleeplabsAPI, sleep_labs_graph, sleep_labs_graph_api
 
 urlpatterns = [
     path('sleep-labs', SleeplabsAPI, name="SleeplabsAPI"),
-    path('', sleep_labs_graph, name="sleep_labs_graph"),
+    path('sleep_labs_graph', sleep_labs_graph, name="sleep_labs_graph"),
     path('sleep_labs_graph_api', sleep_labs_graph_api, name="sleep_labs_graph_api"),
-    path('home', home, name="home"),
+    path('', home, name="home"),
     path('deviceData/', deviceData, name="deviceData"),
     path('sleep_labs_graph_api_v2', sleep_labs_graph_api_v2, name="sleep_labs_graph_api_v2"),
     path('sleep_labs_graph_api_v3/', sleep_labs_graph_api_v3, name="sleep_labs_graph_api_v3"),
