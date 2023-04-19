@@ -4,6 +4,26 @@
 {% block content %}
 
 <style>
+	#detailsgarphbtn{
+		display: none;
+		margin: 0px;
+		background: #AE8F30;
+		border-radius: 4px;
+		width: 100px;
+		height: 35px;
+		border: 0;
+		margin-top: 10px;
+	}
+	#graphbtntag{
+		font-family: 'Segoe UI';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 19px;
+    text-align: center;
+    color: #FFFFFF;
+    padding-left: 23%;
+	}
 	.datetimeForm{
             display: none;
             position: absolute;
@@ -435,7 +455,6 @@ tr:nth-child(odd) {
 		  <div class="dashboardleadsinfoboxline"></div>
 	  </div>
 </div>
-<ul>
 <div id="chatGPT" style="margin-top: 43px;"></div>
 
 <div class="datetimeForm" id="addNewdatetimeFormId">
@@ -493,6 +512,12 @@ tr:nth-child(odd) {
 		</form>
 	</div>
 </div>
+
+
+
+<button id="detailsgarphbtn"><a id="graphbtntag" href="/Sleeplabsgraph/">Details</a></button>
+
+
 <div class="mask" id="maskid"></div> 
 <!-- <li id="chatGPT1"></li> -->
 
@@ -556,6 +581,18 @@ tr:nth-child(odd) {
 	});
 } );
 </script> -->
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.13.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-tables-0.12.13.min.js"></script>
+
+<link href="https://cdn.bokeh.org/bokeh/release/bokeh-0.12.13.min.css" rel="stylesheet" type="text/css">
+<link href="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-0.12.13.min.css" rel="stylesheet" type="text/css">
+<link href="https://cdn.bokeh.org/bokeh/release/bokeh-tables-0.12.13.min.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-0.12.13.min.js"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-0.12.13.min.js"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-0.12.13.min.js"></script>
 
 <script>
 	var todaydatevalue = new Date
@@ -659,6 +696,7 @@ tr:nth-child(odd) {
 		document.getElementById("star4").style.color=""
 		document.getElementById("star5").style.color=""
 		document.getElementById("chatGPT").innerHTML = ""
+		document.getElementById('detailsgarphbtn').style.display = "block"
 		document.getElementById('sleepquality').innerHTML = "Select Date"
 		if(data.Sleep_star == 1){
 			document.getElementById("star1").style.color="#e4b301"
@@ -700,6 +738,9 @@ tr:nth-child(odd) {
 	
 	}
   </script>
+
+
+
 <!-- <script>
 	function litagdata(){
 	const chatGPTResponse1 = "This is the ChatGPT response. It will appear as if it's being typed out in real-time.";
@@ -756,6 +797,7 @@ tr:nth-child(odd) {
 			fetchsleeplabsdata(datajson)
 		})
 </script>
+
 
   
 {% endblock content %}

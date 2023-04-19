@@ -8,6 +8,15 @@ import datetime
 import numpy as np
 import math
 from django.contrib.auth.decorators import login_required 
+
+from bokeh.plotting import figure
+from bokeh.embed import components
+from bokeh.io import output_notebook, show
+from bokeh.plotting import figure
+from bokeh.models import Span
+
+from django.http import JsonResponse
+
 # Create your views here.
 
 @login_required(login_url='login')
@@ -287,7 +296,9 @@ def sleep_labs_graph_api_v3(request):
         print(df)
         
         algo_Data = processSleepData(df)
+        print(algo_Data)
 
+        request.session['algo_Data'] = algo_Data
         return HttpResponse(algo_Data)
     
    
@@ -378,7 +389,6 @@ def algo(df) :
     print("Sample Rate: %ds" %(sample_rate))
     sleep_data['total_time'] =  str(datetime.timedelta(seconds=total_time_s))
     sleep_data['sample_rate'] =  sample_rate
-    
 
 
     # Bed Occupancy Calculations
@@ -458,6 +468,7 @@ def algo(df) :
 
     return jsonapidata
 
+
 def getSleepRating(sleep_time, awake_time,rationIndexes):
 
     try :
@@ -485,3 +496,59 @@ def getSleepRating(sleep_time, awake_time,rationIndexes):
         quality = "NA"
         
     return sleep_ratio, rating, quality
+
+
+
+def Sleeplabsgraph(request):
+    # Define parameters
+    #create a plot 
+    from bokeh.io import output_notebook, show
+    from bokeh.plotting import figure
+    from bokeh.models import Span
+    result = request.session["algo_Data"]
+    print('My session: ', result)
+    # Define parameters
+    total_time = 8*60*60     # Total time in seconds
+    sample_rate = 150        # Sample rate in milliseconds
+    num_samples = int(total_time*1000/sample_rate)
+    sleep_time = 6*60*60     # Sleep time in seconds
+    awake_time = total_time - sleep_time
+    move_duration = 30       # Movement duration in seconds
+    move_freq = 30            # Movement frequency per hour
+    move_periods = int((awake_time/3600) * move_freq)
+    move_timestamps = np.sort(np.random.choice(range(sleep_time), size=move_periods, replace=False))
+
+    # Generate data
+    time = np.arange(num_samples) * sample_rate / 1000.0
+    magnitude = np.ones(num_samples)
+    for ts in move_timestamps:
+        move_start = int((ts/sample_rate) * 1000)
+        move_end = int(((ts+move_duration)/sample_rate) * 1000)
+        magnitude[move_start:move_end] = np.random.uniform(1.2, 2.5)
+
+    # Create dataframe
+    data = {'Time': time, 'Magnitude': magnitude}
+    df = pd.DataFrame(data)
+
+    # Output to Jupyter notebook
+    output_notebook()
+
+    # Create a figure
+    p = figure(plot_width=1320, plot_height=650, x_axis_label='Time (s)', y_axis_label='Acceleration Magnitude', title='Sleep Data')
+
+    # Add a line glyph
+    p.line(df['Time'], df['Magnitude'], line_width=2, color='darkgreen')
+
+    # Highlight movement periods
+    for ts in move_timestamps:
+        start_time = ts - move_duration/2
+        end_time = ts + move_duration/2
+        span = Span(location=ts, dimension='height', line_color='red', line_alpha=0.2)
+        p.add_layout(span)
+    
+    # Show the figure
+    # show(p)
+ 
+    script, div = components(p)
+
+    return render(request, 'sleeplabsgraph.html', {'script': script, 'div': div})

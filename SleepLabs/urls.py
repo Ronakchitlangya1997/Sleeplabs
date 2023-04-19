@@ -1,5 +1,5 @@
 from django.urls import path, include
-from SleepLabs.views import SleeplabsAPI, sleep_labs_graph, sleep_labs_graph_api, home, deviceData,sleep_labs_graph_api_v2, processSleepData, algo,sleep_labs_graph_api_v3
+from SleepLabs.views import SleeplabsAPI, Sleeplabsgraph, sleep_labs_graph, sleep_labs_graph_api, home, deviceData,sleep_labs_graph_api_v2, processSleepData, algo,sleep_labs_graph_api_v3
 
 urlpatterns = [
     path('sleep-labs', SleeplabsAPI, name="SleeplabsAPI"),
@@ -11,4 +11,5 @@ urlpatterns = [
     path('sleep_labs_graph_api_v3/', sleep_labs_graph_api_v3, name="sleep_labs_graph_api_v3"),
     path('processSleepData/', processSleepData, name="processSleepData"),
     path('algo/', algo, name="algo"),
+    path('Sleeplabsgraph/', Sleeplabsgraph, name='Sleeplabsgraph'),
 ]

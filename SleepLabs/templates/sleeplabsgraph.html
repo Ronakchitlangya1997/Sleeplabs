@@ -1,7 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <link href="http://cdn.pydata.org/bokeh/release/bokeh-2.3.2.min.css
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+
+<link href="http://cdn.pydata.org/bokeh/release/bokeh-2.3.2.min.css
     " rel=”stylesheet” type=”text/css”>
  <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-2.3.2.min.css"
     rel=”stylesheet” type=”text/css”>
@@ -11,12 +13,9 @@
    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.3.2.min.js"></script>
     <title>Bokeh plot</title>
     {{ script|safe }}
-</head>
-<body>
     {{ div|safe }}
-</body>
 <script>
     var favoritemovie = "Shrek";
     sessionStorage.setItem("favoriteMovie", favoritemovie);
 </script>
-</html>
+{% endblock content %}
