@@ -783,6 +783,7 @@ tr:nth-child(odd) {
 			var endtime_HH = formData.get('EndTimehours').toString().padStart(2, '0')
 			var endtime_MM = formData.get('EndTimemin').toString().padStart(2, '0')
 			var endtime_SS = formData.get('EndTimesec').toString().padStart(2, '0')
+			var devEUI = "{{request.user.Device_name}}"
 			
 			console.log(dateStr)
 			console.log(starttime_HH + '/' + starttime_MM + '/' + starttime_SS);
@@ -792,7 +793,7 @@ tr:nth-child(odd) {
 			datajson = {"Date":dateStr, "StartTimehours": starttime_HH, 
 						"StartTimemin":starttime_MM, "StartTimesec":starttime_SS,
 						'EndTimehours': endtime_HH, 'EndTimemin': endtime_MM,
-						'EndTimesec': endtime_SS	
+						'EndTimesec': endtime_SS, 'devEUI':devEUI	
 					}
 			console.log('DateTimedata', datajson)
 			fetchsleeplabsdata(datajson)
