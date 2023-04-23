@@ -304,7 +304,7 @@ tr:nth-child(odd) {
 			}
 			@media screen and (max-width: 410px) {
 				.mainContainer{
-					margin: 0px 0px 0px 0px;
+					margin: 0px 10px 0px 10px;
 				}
 				.logoutbtn {
 					margin-right: 0px;
@@ -314,8 +314,9 @@ tr:nth-child(odd) {
 				}
 				.dashboardBoxHeading{
 					margin-top: 15px;
-    				font-size: 22px;
+    				font-size: 21px;
     				width: 210px;
+					margin-top: 21px;
 				}
 				.selectnewdatetimeBtn{
 					width: 150px;
@@ -333,7 +334,7 @@ tr:nth-child(odd) {
 			}
 			@media screen and (max-width: 330px) {
 				.mainContainer{
-					margin: 0px 0px 0px 0px;
+					margin: 0px 10px 0px 10px;
 				}
 				.logoutbtn {
 					margin-right: 0px;
@@ -359,10 +360,10 @@ tr:nth-child(odd) {
 </style>
 
 <div class="d-flex justify-content-between dashboardBox">
-	<h2 class="dashboardBoxHeading">Welcome back, {{request.user.first_name}}</h2>
+	<h2 class="dashboardBoxHeading">Welcome back, <b>{{request.user.first_name}}</b></h2>
 	<div class="btn-group flex-wrap justify-content-end">
 		<div class="datetimepickerbox d-flex">
-			<button class="selectnewdatetimeBtn" onclick="opencloseaddnewdatetimeForm()">Select Date Time</button>
+			<button class="selectnewdatetimeBtn" onclick="opencloseaddnewdatetimeForm()">Select Time</button>
 			<!-- <div class="d-flex">
 				<input id="datepicker" placeholder="Start Date" onchange="fetchsleeplabsdata(this.value)">
 				<span class="input-group-addon">

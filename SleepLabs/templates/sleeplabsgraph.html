@@ -3,6 +3,34 @@
 
 {% block content %}
 
+<style>
+    .bk-root{
+        overflow: auto;
+    }
+    @media screen and (max-width: 1100px) {
+				.mainContainer{
+					margin: 0px 20px 0px 20px;
+				}
+				.logoutbtn {
+					margin-right: 20px;
+				}
+
+			}
+
+            @media screen and (max-width: 550px) {
+				.mainContainer{
+					margin: 0px 10px 0px 0px;
+				}
+				.logoutbtn {
+					margin-right: 10px;
+				}
+				.logoutbtntxt{
+					display: none;
+				}
+							
+			}
+</style>
+
 <link href="http://cdn.pydata.org/bokeh/release/bokeh-2.3.2.min.css
     " rel=”stylesheet” type=”text/css”>
  <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-2.3.2.min.css"

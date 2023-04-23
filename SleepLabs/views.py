@@ -294,7 +294,7 @@ def sleep_labs_graph_api_v3(request):
 
         print("Fetching the raw dataframe :")
         print(df)
-        
+    
         algo_Data = processSleepData(df)
         print(algo_Data)
 
