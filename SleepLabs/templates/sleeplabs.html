@@ -514,7 +514,60 @@ tr:nth-child(odd) {
 	</div>
 </div>
 
-
+<div class="Dashboarddatabox">
+	<div id="totalleads" class="Dashboarddata dashboardleadsinfobox">
+		<h5 class="dashboardleadsinfoboxheading">Device Status</h5>
+		<div class="d-flex flex-row gap-4 ml-4 mt-2">
+			<!-- <div style="width: 56px; height: 56px;">
+				<img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
+			</div> -->
+			<div class="dashboardcircle">
+				<!-- <span class="material-symbols-outlined dashboardicon">
+					bedtime
+					</span> -->
+					<span class="material-symbols-sharp dashboardicon">
+						notification_add
+						</span>
+			</div>
+			<h4 class="dashboardleadsinfovalue counterclass" id='devicestatusalue'  style="font-size: 26px;">Not Active</h4>
+		</div>
+		<div class="dashboardleadsinfoboxline"></div>
+		<!-- <a class="dashboardleadsinfoboxviewallbtn" href="#" onclick="isKeyPressed(event)">View All</a> -->
+	  </div>
+	<div id="Assignedleads" class="Dashboarddata dashboardleadsinfobox">
+	  <h5 class="dashboardleadsinfoboxheading">Last Active</h5>
+	  <div class="d-flex flex-row gap-4 ml-4 mt-2">
+		<!-- <div style="width: 56px; height: 56px;">
+			<img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
+		</div> -->
+		<div class="dashboardcircle">
+			<span class="material-symbols-outlined dashboardicon">
+				airline_seat_individual_suite
+				</span>
+		</div>
+		<h4 class="dashboardleadsinfovalue counterclass" id='lastactivevalue' style="font-size: 26px;">00:00:00</h4>
+		</div>
+		<div class="dashboardleadsinfoboxline"></div>
+	</div>
+	<div id="Unassignedleads" class="Dashboarddata dashboardleadsinfobox">
+	  <h5 class="dashboardleadsinfoboxheading">Orientation</h5>
+	  <div class="d-flex flex-row gap-4 ml-4 mt-2">
+		<!-- <div style="width: 56px; height: 56px;">
+			<img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
+		</div> -->
+		<div class="dashboardcircle">
+			<!-- <span class="material-symbols-outlined dashboardicon">
+				sleep
+				</span> -->
+				<span class="material-symbols-sharp dashboardicon">
+					flip
+					</span>
+		</div>
+		<h4 class="dashboardleadsinfovalue counterclass" id='Orientationvalue'  style="font-size: 26px;">Vertical</h4>
+		</div>
+		<div class="dashboardleadsinfoboxline"></div>
+	</div>
+</div>
 
 <button id="detailsgarphbtn"><a id="graphbtntag" href="/Sleeplabsgraph/">Details</a></button>
 
@@ -800,6 +853,26 @@ tr:nth-child(odd) {
 		})
 </script>
 
-
+<script>
+	var data1
+	console.log("userm", "{{request.user.Device_name}}")
+	fetch('/devicestatus/', {
+		method: "POST",
+		credentials: "same-origin",
+		headers: {
+		  "X-Requested-With": "XMLHttpRequest",
+		  "X-CSRFToken": getCookie("csrftoken"),
+		},
+		body: JSON.stringify("{{request.user.Device_name}}")
+	  })
+	  .then(response => response.json())
+	  .then(data => {
+		console.log(data);
+		data1 = new Date(data.lastActive)
+		document.getElementById('devicestatusalue').innerHTML = data.Device
+		document.getElementById('lastactivevalue').innerHTML = data1.toLocaleString();
+		document.getElementById('Orientationvalue').innerHTML = data.orientation;
+	  })
+</script>
   
 {% endblock content %}

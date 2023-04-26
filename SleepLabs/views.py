@@ -693,3 +693,76 @@ def Sleeplabsgraph(request):
     script, div = components(p)
 
     return render(request, 'sleeplabsgraph.html', {'script': script, 'div': div})
+
+def orientation(request) :
+
+    devID = 'F0230003'
+
+    obj= SleepLabOptv1.objects.filter(DevID=devID).order_by('-auto_increment_id')[0]
+
+    data = obj.jsonData
+
+    print(type(obj.jsonData))
+
+    print(data['S239'])
+
+    AcX = data['S239']['AcX']
+    AcY = data['S239']['AcY']
+    AcZ = data['S239']['AcZ']
+
+    if(int(AcX) > int(AcZ) or int(AcY)>int(AcZ)) :
+        orientation = 'Vertical'
+    else :
+        orientation = 'Flat'
+    
+    print("Orientation : ", orientation)
+
+    
+
+    return HttpResponse('ok')
+
+def Devicestatus(request):
+
+    if request.method == "POST":
+        sleep_data = {}
+        jsondata = json.loads(request.body)
+        print(jsondata)
+        latest_datetime = SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-timestamp').first()
+        previous_datetime= datetime.datetime.strptime(latest_datetime.timestamp, '%Y-%m-%d %H:%M:%S.%f') 
+        print('previous_datetime', previous_datetime)
+        present_datetime = datetime.datetime.now()
+        # Calculate the difference between the two dates
+        time_difference = present_datetime - previous_datetime
+
+        # Check if the difference is greater than 1 minute
+        if time_difference > datetime.timedelta(minutes=1):
+            data = {
+                'Device': 'Not Active',
+            }
+        else:
+            data['Device'] = 'Active'
+        data['lastActive'] = previous_datetime
+
+        obj= SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-auto_increment_id')[0]
+
+        obj_data = obj.jsonData
+
+        print(type(obj.jsonData))
+
+        print(obj_data['S239'])
+
+        AcX = obj_data['S239']['AcX']
+        AcY = obj_data['S239']['AcY']
+        AcZ = obj_data['S239']['AcZ']
+
+        if(int(AcX) > int(AcZ) or int(AcY)>int(AcZ)) :
+            orientation = 'Vertical'
+            data['orientation'] = 'Vertical'
+        else :
+            orientation = 'Horizontal'
+            data['orientation'] = 'Horizontal'
+        
+    return JsonResponse(data)
+
+
+
