@@ -766,3 +766,52 @@ def Devicestatus(request):
 
 
 
+def sleephighligh(request):
+    from bokeh.plotting import figure, show
+    from bokeh.models import ColumnDataSource, DataTable, TableColumn
+    from bokeh.layouts import column
+    import pandas as pd
+
+    data = pd.read_csv('withmag.csv')
+    data['Timestamp'] = pd.to_datetime(data['Timestamp'])
+    data['Oc2'].astype(int)
+    df = data
+    #     # create sample data
+    # data = {'magnitude': [2.5, 3.2, 4.1, 3.5, 2.9],
+    #         'timestamp': ['2023-04-26 08:00:00', '2023-04-26 08:01:00', '2023-04-26 08:02:00', '2023-04-26 08:03:00', '2023-04-26 08:04:00'],
+    #         'avg': [0, 1, 0, 1, 0]}
+
+    # # create DataFrame
+    # df = pd.DataFrame(data)
+
+    # display DataFrame
+    print(df)
+
+    source = ColumnDataSource(df)
+
+    p = figure(title="Magnitude vs Timestamp", x_axis_type='datetime', x_axis_label='Timestamp', y_axis_label='Magnitude')
+
+    # Add the line chart
+    p.line(x='Timestamp', y='Magnitude', source=source, line_width=2)
+
+    # Add a circle glyph for the points where avg == 1
+    p.circle(x='Timestamp', y='Magnitude', source=df[df['Oc2'] == 1], fill_color='red', size=8)
+
+
+    # # create figure
+    # p = figure(title="Magnitude vs Timestamp", x_axis_label='Timestamp', y_axis_label='Magnitude')
+
+    # # plot magnitude vs timestamp
+    # p.line(df['Timestamp'], df['Magnitude'], line_width=2)
+
+    # # highlight parts where avg is 1
+    # # p.patch(df[df['Oc2'] == 1]['Timestamp'], df[df['Oc2'] == 1]['Timestamp'], alpha=0.3, color='red')
+    # p.circle(x='Timestamp', y='Magnitude', source=source[df['avg'] == 1], fill_color='red', size=8)
+
+
+    script, div = components(p)
+
+    return render(request, 'sleeplabsgraph.html', {'script': script, 'div': div})
+
+
+
