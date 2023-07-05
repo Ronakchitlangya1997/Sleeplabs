@@ -87,9 +87,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
-        'USER': 'ubuntu',
-        'PASSWORD': 'hggk2EJL7LAwbU8',
-        'HOST': 'ec2-13-232-235-14.ap-south-1.compute.amazonaws.com', 
+        'USER': 'postgres',
+        'PASSWORD': 'sleeplabs',
+        'HOST': 'database-1.cpqyxuqnkv6b.ap-south-1.rds.amazonaws.com', 
         'PORT': 5432
     }
 }

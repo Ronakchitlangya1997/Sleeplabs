@@ -31,3 +31,11 @@ class SleepLabOptv1(models.Model):
     class Meta:
         ordering = ('-timestamp', )
 
+class SleepLabOptv1Dummy(models.Model):
+    auto_increment_id = models.AutoField(primary_key=True)
+    timestamp = models.CharField(max_length=122, default='01 June, 2022')
+    jsonData = JSONField(default=list)
+    DevID = models.CharField(max_length=20, default='None')
+    class Meta:
+        ordering = ('-timestamp', )
+

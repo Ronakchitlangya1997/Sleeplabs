@@ -17,35 +17,18 @@ from bokeh.models import Span
 
 from django.http import JsonResponse
 
-# Create your views here.
+import pandas as pd
+import math
+
+EXCEL = 1
 
 @login_required(login_url='login')
 def home(request):
     return render(request, 'sleeplabs.html')
 
-@csrf_exempt
-def SleeplabsAPI(request):
-    if request.method =="POST":
-        print(request.body)
-        # data = b'AcX = 427, AcY = 1550, AcZ = -1572, GyX = -711, GyY = 1895, GyZ = -156 \r\n'
-        post_data = request.body.decode()
-        data = post_data.split(",")
-        split_data = []
-        for ele in data:
-            split_data.append(ele.split('='))
-        print(split_data)
-        Sleep_Labsobject=SleepLab(AcX=split_data[0][1], AcY=split_data[1][1], AcZ=split_data[2][1],
-                                        GyX=split_data[3][1], GyY=split_data[4][1], GyZ=split_data[5][1], OCC=split_data[6][1])
-        Sleep_Labsobject.save()
-        return HttpResponse('ok')
-    return HttpResponse('Not working')
-
-import pandas as pd
-import math
 
 @csrf_exempt
 def deviceData(request):
-
     now = datetime.datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")
     print("Current Time : ",dt_string)
@@ -82,8 +65,6 @@ def dict_to_series(d):
     return pd.Series(d)
 
 # Apply function to each row of the column containing dictionaries
-
-
 def timestampKey(t, d, id):
 
     time = t
@@ -91,6 +72,7 @@ def timestampKey(t, d, id):
     for i in range(len(d) - 1):
 
         sample = 'S' + str(len(d) - 1 - i -1)
+        #print(sample)
 
         packetTime = time
         
@@ -100,426 +82,7 @@ def timestampKey(t, d, id):
 
     return d
 
-def sleep_labs_graph_api_v2(request):
-
-    
-    #Fetch All
-    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.all().values())
-
-    #Fetch certain date
-    #date_str = '2023-03-29'
-    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__startswith=date_str).values())
-
-    #Fetch from a certain timestamp
-
-    if request.method == "POST":
-
-        
-        sleep_data = {}
-        jsondata = json.loads(request.body)
-        date_str_start = jsondata['Date']
-        date_str_end = jsondata['Date']
-        start_time_str = jsondata['StartTimehours']+":"+jsondata['StartTimemin']+":"+jsondata['StartTimesec']
-        end_time_str = jsondata['EndTimehours']+":"+jsondata['EndTimemin']+":"+jsondata['EndTimesec']
-
-        print(date_str_start, date_str_end, start_time_str, end_time_str)
-        # date_str_start = '2023-03-29'
-        # date_str_end = '2023-03-29'
-        # start_time_str = '16:00:00'
-        # end_time_str = '17:00:00'
-
-        start_datetime_str = date_str_end + ' ' + start_time_str
-        end_datetime_str = date_str_end + ' ' + end_time_str
-
-        df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
-
-        print("Fetching the raw dataframe :")
-        print(df)
-        
-
-        df.to_csv('./rawData.csv')
-        processSleep_Data = processSleepData()
-
-        algo_Data = algov2()
-        
-        return HttpResponse(algo_Data)
-   
-    return HttpResponse('ok')
-
-
-def sleep_labs_graph_api_v3(request):
-
-    
-    #Fetch All
-    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.all().values())
-
-    #Fetch certain date
-    #date_str = '2023-03-29'
-
-    date_str_start = '2023-03-31'
-    date_str_end = '2023-03-31'
-    start_time_str = '00:00:00'
-    end_time_str = '08:00:00'
-
-    #Fetch from a certain timestamp
-
-    start_datetime_str = date_str_end + ' ' + start_time_str
-    end_datetime_str = date_str_end + ' ' + end_time_str
-
-    if request.method == "POST":
-        sleep_data = {}
-        jsondata = json.loads(request.body)
-        date_str_start = jsondata['Date']
-        date_str_end = jsondata['Date']
-        start_time_str = jsondata['StartTimehours']+":"+jsondata['StartTimemin']+":"+jsondata['StartTimesec']
-        end_time_str = jsondata['EndTimehours']+":"+jsondata['EndTimemin']+":"+jsondata['EndTimesec']
-
-        print(date_str_start, date_str_end, start_time_str, end_time_str)
-        # date_str_start = '2023-03-29'
-        # date_str_end = '2023-03-29'
-        # start_time_str = '16:00:00'
-        # end_time_str = '17:00:00'
-
-        start_datetime_str = date_str_end + ' ' + start_time_str
-        end_datetime_str = date_str_end + ' ' + end_time_str
-
-        df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
-
-        print("Fetching the raw dataframe :")
-        print(df)
-
-        print("Missing dB")
-        df_2 = df.set_index('timestamp')
-        df_2.index = pd.to_datetime(df_2.index)
-
-        hourly_counts = df_2.resample('H').count()
-        print(hourly_counts)
-        # df.to_excel('./rawData.xlsx')
-        
-        algo_Data = processSleepData(df)
-        print(algo_Data)
-
-        request.session['algo_Data'] = algo_Data
-        return HttpResponse(algo_Data)
-    
-   
-
-
-# def processSleepData(df) :
-#     #df = pd.read_csv('./rawData.csv')
-
-#     df = pd.DataFrame(df)
-#     print(df)
-#     print(df.dtypes)
-
-#     #df['jsonData'] = df['jsonData'].apply(converStringToDict)
-
-#     df['dict_len'] = df['jsonData'].apply(dict_len)
-
-#     df['timestamp'] = pd.to_datetime(df['timestamp'])
-
-#     df['jsonData'] = df.apply(lambda row: timestampKey(row['timestamp'], row['jsonData'], row['auto_increment_id']), axis=1)
-
-#     df_new = pd.DataFrame(columns=['AcX', 'AcY', 'AcZ', 'GyX', 'GyY', 'GyZ', 'Oc2', 'OcV', 'Occ', 'OcV2', 'time', 'id'])
-
-
-#     y = []
-#     # loop over each row
-#     for index, row in df.iterrows():
-#         d= row['jsonData']
-#         del d['DeviceID']
-
-#         x = []
-#         for i in range(len(d) - 1):
-#             sample = 'S' + str(len(d) - 1 - i -1)
-#             d[sample]['id'] = sample
-#             x.append(d[sample])
-
-#         df = pd.DataFrame(x)
-#         frames = [df_new, df]
-#         df_new = pd.concat(frames)
-
-#     print(df_new)
-
-#     jsonapidata = algo(df_new)
-#     #df_new.to_csv('./processedData.csv')
-
-#     return jsonapidata
-
-
-def processSleepData(df) :
-    #df = pd.read_csv('./rawData.csv')
-
-    df = pd.DataFrame(df)
-    print(df)
-    print(df.dtypes)
-
-    #df['jsonData'] = df['jsonData'].apply(converStringToDict)
-
-    df['dict_len'] = df['jsonData'].apply(dict_len)
-
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
-
-    df['jsonData'] = df.apply(lambda row: timestampKey(row['timestamp'], row['jsonData'], row['auto_increment_id']), axis=1)
-
-    df_new = pd.DataFrame(columns=['AcX', 'AcY', 'AcZ', 'GyX', 'GyY', 'GyZ', 'Oc2', 'OcV', 'Occ', 'OcV2', 'time', 'id'])
-
-    missing_samples = []  # list to store missing samples for each row
-
-    # loop over each row
-    for index, row in df.iterrows():
-        d= row['jsonData']
-        del d['DeviceID']
-
-        x = []
-        for i in range(len(d) - 1):
-            sample = 'S' + str(len(d) - 1 - i -1)
-            if sample not in d:
-                missing_samples.append(sample)  # add missing sample to list
-                continue
-            d[sample]['id'] = sample
-            x.append(d[sample])
-
-        df = pd.DataFrame(x)
-        frames = [df_new, df]
-        df_new = pd.concat(frames)
-    print("Missing Samples")
-    print(missing_samples)  # print list of missing samples for all rows
-
-    print(df_new)
-
-    jsonapidata = algov2(df_new)
-    #df_new.to_csv('./processedData.csv')
-
-    return jsonapidata
-
-# def algo(df) :
-
-#     #df = pd.read_csv('./processedData.csv')
-
-
-#     print("Running the algorithm .............................")
-
-#     # From Frontend 
-#     bedOccToggleOne = 0
-#     bedOccToggleTwo = 0
-#     bedOccThresholdOne = 1.1
-#     bedOccThresholdTwo = 1.1
-
-#     print("Bed Occupancy Inputs :")
-#     print(f"Sensor-1 :: Toggle ; Threshold : {bedOccToggleOne} ; {bedOccThresholdOne}")
-#     print(f"Sensor-2 :: Toggle ; Threshold : {bedOccToggleTwo} ; {bedOccThresholdTwo}")
-
-
-#     sleep_data = {}
-
-#     df = df[::-1]
-#     x = []
-#     df['AcX'] = df['AcX'].astype('int')
-#     df['AcY'] = df['AcY'].astype('int')
-#     df['AcZ'] = df['AcZ'].astype('int')
-
-#     for index, row in df.iterrows():
-#         x.append(math.sqrt(row['AcX']**2 + row['AcY']**2 + row['AcY']**2))
-        
-#     df['Magnitude'] = x
-#     df['Magnitude'] = df['Magnitude']/2048
-
-#     # Total Time and Sample Rate Calculation
-#     df['Timestamp'] = pd.to_datetime(df['time'])
-#     time = df['Timestamp'].values
-#     sample_rate = int(np.round((time[1] - time[0]) / np.timedelta64(1, 'ms')))
-#     total_time = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
-#     total_time_s = round(total_time/1000)
-
-#     print("Sleep Calculations :")
-#     print("Total Time : %ds ; %s hr " %(total_time_s, str(datetime.timedelta(seconds=total_time_s))))
-#     print("Sample Rate: %ds" %(sample_rate))
-#     sleep_data['total_time'] =  str(datetime.timedelta(seconds=total_time_s))
-#     sleep_data['sample_rate'] =  sample_rate
-    
-
-
-#     # Bed Occupancy Calculations
-#     if bedOccToggleOne == 1 and bedOccToggleTwo == 1:
-#         df = df[(df['OcV'].astype(float) < bedOccThresholdOne) & (df['OcV2'].astype(float) < bedOccThresholdTwo)].reset_index()
-#     elif bedOccToggleOne == 1:
-#         df = df[df['OcV'].astype(float) < bedOccThresholdOne].reset_index()
-#     elif bedOccToggleTwo == 1:
-#         df = df[df['OcV2'].astype(float) < bedOccThresholdTwo].reset_index()
-#     else:
-#         # Both toggles are inactive
-#         pass
-
-#     time = df['Timestamp'].values
-    
-#     try :
-#         bedOccupantTime = int(np.round((time[-1] - time[0]) / np.timedelta64(1, 'ms')))
-#     except :
-#         print("No Occupant Activity")
-#         bedOccupantTime = 0
-
-#     bedOccupantTime_s = round(bedOccupantTime/1000)
-#     print("Bed Occupant Time : %ss ; %s hr " %(bedOccupantTime_s, str(datetime.timedelta(seconds=bedOccupantTime_s)) ))
-#     sleep_data['bedOccupantTime'] =  str(datetime.timedelta(seconds=bedOccupantTime_s))
-
-#     # Sleep Time and Awake Time Calculations
-#     total_time = bedOccupantTime
-#     magnitude = df['Magnitude'].values
-#     threshold = 1.1
-
-
-#     sleep_time = len(np.where(magnitude < threshold)[0]) * sample_rate // 1000
-#     awake_time = total_time // 1000 - sleep_time
-
-#     # magnitude_diff = np.abs(np.diff(magnitude))
-#     # magnitude_diff[magnitude_diff < np.mean(magnitude_diff)] = 0
-#     # magnitude_diff[magnitude_diff > 0] = 1
-#     # move_timestamps = np.where(magnitude_diff == 1)[0] * sample_rate // 1000
-#     # move_duration = np.median(np.diff(move_timestamps))
-#     #move_freq = len(move_timestamps) / awake_time
-
-#     #*******Movement Timestamp Record **********#
-#     print("Getting Movement Instances")
-#     print("print magnitude")
-
-#     # Define the bins
-#     bins = [0, 0.5, 0.8, 1, 1.2, float('inf')]
-
-#     # Bin the values and count the number of values in each bin
-#     magnitude_counts = pd.cut(df['Magnitude'], bins=bins).value_counts()
-
-#     # Print the resulting distribution
-#     print(magnitude_counts)
-#     # less_than_threshold = df[df['Magnitude'] <0]
-#     # timestamps = less_than_threshold.loc[:, 'time']
-#     # print(timestamps)
-
-#     # print(df['Magnitude'])
-#     # indices = np.where(magnitude < threshold)[0]
-#     # timestamps = df.iloc[indices]['time']
-#     # print(timestamps)
-
-
-#     print("Sleep Time : %ds ; %s hr " %(sleep_time, str(datetime.timedelta(seconds=sleep_time)) ))
-#     print("Awake Time : %ds ; %s hr " %(awake_time, str(datetime.timedelta(seconds=awake_time)) ))
-
-#     sleep_data['sleep_time'] =  str(datetime.timedelta(seconds=sleep_time))
-#     sleep_data['awake_time'] =  str(datetime.timedelta(seconds=awake_time))
-
-#     if total_time_s == 0 or awake_time+sleep_time == 0 :
-#         print("In the if statement of Zero Checks")
-#         print("Bed Occupant Time is", awake_time+sleep_time)
-#         Sleep_info = "Summary Not Available"
-    
-#     else :
-#         Sleep_info = "Of the" + " " + str(sleep_data['total_time']) + " " "of monitoring :" + "\n" + "You slept for" + " " + str(int((bedOccupantTime_s/total_time_s)*100)) + "%" + " " + "of the time." + "\n" + "Your pillow was unoccupied for" + " " + str(int(100- int((bedOccupantTime_s/total_time_s)*100))) +"%"+ " of the time." + "\n" + "You slept restfully for" + " " + str( int((sleep_time/(awake_time+sleep_time))*100) ) + "%" + " of the entire sleep duration."
-    
-#     sleep_data['Sleep_info'] = Sleep_info
-
-#     print(Sleep_info)
-#     # Get from front-end otherwise default as following :
-#     rationIndexes = [0.95, 0.9, 0.8, 0.7]
-
-#     Sleep_ratio, Sleep_star, Sleep_quality = getSleepRating(sleep_time, awake_time,rationIndexes)
-    
-#     print("Sleep Quality Outputs :")
-#     print("Sleep Ratio :", Sleep_ratio)
-#     print("Sleep Star :", Sleep_star)
-#     print("Sleep Quality :", Sleep_quality)
-    
-#     sleep_data['Sleep_ratio'] = Sleep_ratio
-#     sleep_data['Sleep_star'] = Sleep_star
-#     sleep_data['Sleep_quality'] = Sleep_quality
-
-#     print("Analysis Complete ...................................")
-
-#     jsonapidata = json.dumps(sleep_data)
-
-#     return jsonapidata
-
-def algov2(df) :
-
-    #df = pd.read_csv('./processedData.csv')
-    #df.to_csv('./procssedSleepData.csv')
-
-
-    print("Running the algorithm ...............")
-
-
-    occToggle = 0
-    occThresh = 1.2
-
-    sleep_data = {}
-
-    sample_rate = 250
-
-    df = df[::-1]
-
-    totalTimeHR, totalPoints = totalTime(df)
-
-    print("Adding Magnitude...")
-    df = addMagnitude(df)
-
-
-    print("Computing Bed Occupancy...")
-    df, sample_rate = bedOccData(df, occToggle, occThresh)
-
-
-    print("Hour KPIs Computation...")
-    totalOccPoints, countNegative, countPositive, totalMovingPoints = magArrayProcessing(df['Magnitude'].values)
-
-    print("Computing Distribution...")
-    computeDistribution(df)
-
-    print("Converting to proper hours...")
-    kpi = secondstoHours([totalOccPoints, totalMovingPoints, totalOccPoints-totalMovingPoints])
-
-    print("Results...")
-    print("Total Time :", totalTimeHR)
-    print("Occupant Time : ", kpi[0])
-    print("Movement Time : ", kpi[1])
-
-    sleep_data['total_time'] =  totalTimeHR
-    sleep_data['sample_rate'] =  sample_rate
-    sleep_data['bedOccupantTime'] =  kpi[0]
-    sleep_data['awake_time'] =  kpi[1]
-    sleep_data['sleep_time'] =  kpi[2]
-    
-
-    print()
-
-    if sleep_data['bedOccupantTime'] == "00:00:00" :
-        print("In the if statement of Zero Checks")
-        print("Bed Occupant Time is", sleep_data['bedOccupantTime'])
-        Sleep_info = "Summary Not Available"
-    
-    else :
-        Sleep_info = "Of the" + " " + str(sleep_data['total_time']) + " " "of monitoring :" + "\n" + "Your bed was occupied for" + " " + str(int((totalOccPoints/totalPoints)*100)) + "%" + " " + "of the time." + "\n" + "Your pillow was unoccupied for" + " " + str(int(100- int((totalOccPoints/totalPoints)*100))) +"%"+ " of the time." + "\n" + "You slept restfully for" + " " + str( int(((totalOccPoints-totalMovingPoints)/(totalMovingPoints+(totalOccPoints-totalMovingPoints)))*100) ) + "%" + " of the entire sleep duration."
-    
-    sleep_data['Sleep_info'] = Sleep_info
-
-    print(Sleep_info)
-    # Get from front-end otherwise default as following :
-    rationIndexes = [0.95, 0.9, 0.8, 0.7]
-
-    Sleep_ratio, Sleep_star, Sleep_quality = getSleepRating(totalOccPoints-totalMovingPoints, totalMovingPoints,rationIndexes)
-    
-    print("Sleep Quality Outputs :")
-    print("Sleep Ratio :", Sleep_ratio)
-    print("Sleep Star :", Sleep_star)
-    print("Sleep Quality :", Sleep_quality)
-    
-    sleep_data['Sleep_ratio'] = Sleep_ratio
-    sleep_data['Sleep_star'] = Sleep_star
-    sleep_data['Sleep_quality'] = Sleep_quality
-
-    print("Analysis Complete ...................................")
-
-    jsonapidata = json.dumps(sleep_data)
-
-    return jsonapidata
-
+#Helper Functions
 def addMagnitude(df):
     sample_rate = 250
     df['AcX'] = df['AcX'].astype('int')
@@ -554,7 +117,7 @@ def bedOccData (df, occToggle, occThresh) :
 
     return df, abs(sample_rate)
 
-def magArrayProcessing (array) :
+def magArrayProcessing (array, df) :
     sample_rate = 250
     
     # Total 
@@ -563,6 +126,8 @@ def magArrayProcessing (array) :
     # Calculate the average of the array
     avg = np.mean(array)
 
+    print("Average :", avg)
+
     # Set a threshold as the average
     thresholdPositive = avg+0.03
     thresholdNegative = avg-0.03
@@ -570,14 +135,28 @@ def magArrayProcessing (array) :
     # Count the number of values greater than the threshold
     countPositive = np.sum(array > thresholdPositive)
     countNegative = np.sum(array < thresholdNegative)
+
+    print("Points :")
+    print(countPositive)
+    print(countNegative)
     
     totalMovingPoints = countPositive + countNegative
     
     totalMovingPoints = totalMovingPoints*sample_rate // 1000
+
+    # Create 'Movement' column
+    df['Movement'] = "0"
+
+    # Apply condition to set 'Orientation' to 'Vertical'
+
+    df.loc[(abs(df['Magnitude']) > thresholdPositive) | (abs(df['Magnitude']) < thresholdNegative), 'Movement'] = "1"
+
+
+    if EXCEL :
+        df.to_excel('./SleepLabs/Data/movementDistribution.xlsx')
+
     
     return totalPoints, countNegative, countPositive, totalMovingPoints
-
-
 
 def secondstoHours(secs):
     sample_rate = 250
@@ -589,17 +168,41 @@ def secondstoHours(secs):
 
 def computeDistribution(df) :
     sample_rate = 250
-    magBins = [0, 0.5, 0.6, 0.7, 0.8, 0.9, 0.93, 0.94, 0.96, 0.97,1, 1.1, 1.2, 1.3, 1.4, 1.5, float('inf')]
+    magBins = [0, 0.5, 0.6, 0.7, 0.8, 0.9, 0.93, 0.94, 0.96, 0.97,1, 1.2, 1.23, 1.26, 1.29, 1.3, 1.4, 1.5, float('inf')]
     magCounts = pd.cut(df['Magnitude'], bins=magBins).value_counts()
     
     print("Magnitude Distribution")
     print(magCounts.sort_index())
+    print(type(magCounts.sort_index()))
+    magCounts.sort_index().to_excel('./SleepLabs/Data/magnitudeDistribution.xlsx')
+
+
+    # Orientation
+
+    # Convert columns to float data type
+    df[['AcX', 'AcY', 'AcZ']] = df[['AcX', 'AcY', 'AcZ']].astype(float)
+
+    # Create 'Orientation' column
+    df['Orientation'] = "Horizontal"
+
+    # Apply condition to set 'Orientation' to 'Vertical'
+    df.loc[(abs(df['AcX']) > abs(df['AcZ'])) | (abs(df['AcY']) > abs(df['AcZ'])), 'Orientation'] = "Vertical"
+
+
+
+    # df['Orientation'] = "Horizontal"
+    # df.loc[(abs(int(df['AcX'])) > abs(int(df['AcZ']))) or (abs(int(df['AcY']))>abs(int(df['AcZ']))) , 'Orientation'] = "Vertical"
     
+    if EXCEL :
+        df.to_excel('./SleepLabs/Data/orientation.xlsx')
+
     occVBins = [0, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, float('inf')]
     occVCounts = pd.cut(df['OcV'], bins=occVBins).value_counts()
     
     print("occV Distribution")
     print(occVCounts.sort_index())    
+
+    occVCounts.sort_index().to_excel('./SleepLabs/Data/voltageDistribution.xlsx')
 
 def totalTime (df) :
     sample_rate = 250
@@ -609,7 +212,6 @@ def totalTime (df) :
     
     return totalTimeHR, totalPoints
     
-
 def getSleepRating(sleep_time, awake_time,rationIndexes):
 
     try :
@@ -639,6 +241,364 @@ def getSleepRating(sleep_time, awake_time,rationIndexes):
     return sleep_ratio, rating, quality
 
 
+
+def sleep_labs_graph_api_v3(request):
+
+    
+    #Fetch All
+    #df = pd.DataFrame.from_records(SleepLabOptv1.objects.all().values())
+
+    #Fetch certain date
+    #date_str = '2023-03-29'
+
+    date_str_start = '2023-03-31'
+    date_str_end = '2023-03-31'
+    start_time_str = '00:00:00'
+    end_time_str = '08:00:00'
+
+    #Fetch from a certain timestamp
+
+    start_datetime_str = date_str_end + ' ' + start_time_str
+    end_datetime_str = date_str_end + ' ' + end_time_str
+
+    if request.method == "POST":
+        sleep_data = {}
+        jsondata = json.loads(request.body)
+        date_str_start = jsondata['Date']
+        date_str_end = jsondata['Date']
+        devEUI = jsondata['devEUI']
+        start_time_str = jsondata['StartTimehours']+":"+jsondata['StartTimemin']+":"+jsondata['StartTimesec']
+        end_time_str = jsondata['EndTimehours']+":"+jsondata['EndTimemin']+":"+jsondata['EndTimesec']
+
+        print(date_str_start, date_str_end, start_time_str, end_time_str)
+
+        #Dummy
+        date_str_start = '2023-05-04'
+        date_str_end = '2023-05-05'
+        start_time_str = '22:00:00'
+        end_time_str = '10:00:00'
+
+        start_datetime_str = date_str_start + ' ' + start_time_str
+        end_datetime_str = date_str_end + ' ' + end_time_str
+
+        
+        df = pd.DataFrame.from_records(SleepLabOptv1.objects.filter(DevID =devEUI, timestamp__gte=start_datetime_str, timestamp__lte=end_datetime_str).values())
+        
+
+        print("Fetching the raw dataframe :")
+        print(df)
+        print(df.info())
+
+        print("Missing dB")
+        df_2 = df.set_index('timestamp')
+        
+        df_2.index = pd.to_datetime(df_2.index)
+
+        hourly_counts = df_2.resample('H').count()
+        print(hourly_counts)
+        print(type(hourly_counts))
+        hourly_counts.to_excel('./SleepLabs/Data/rawPSRDistribution.xlsx')
+        if EXCEL :
+            df.to_excel('./SleepLabs/Data/rawData.xlsx')
+
+        # ***************************** DUMMY ****************************** #
+
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        # set timestamp column as index
+        df.set_index('timestamp', inplace=True)
+
+        # resample to one minute interval and fill missing values with the previous row
+        df_resampled = df.resample('1T').ffill()
+
+        # reset index
+        df_resampled.reset_index(inplace=True)
+
+        df = df_resampled
+
+        df = df.drop(0)
+
+        print(df)
+        df_2 = df.set_index('timestamp')
+        df_2.index = pd.to_datetime(df_2.index)
+
+        hourly_counts = df_2.resample('H').count()
+        print(hourly_counts)
+        print(type(hourly_counts))
+
+        hourly_counts.to_excel('./SleepLabs/Data/extrapolatedPSRDistribution.xlsx')
+        #df.to_excel('./SleepLabs/Data/extrapolatedData.xlsx')
+
+
+
+        #Dummy
+
+        # df = pd.read_excel('./rawDataDummyFinal.xlsx')
+        # print(df)
+        # df = df.drop(0)
+        # print(df.info())
+        
+        algo_Data = processSleepData(df)
+        print(algo_Data)
+
+        request.session['algo_Data'] = algo_Data
+        return HttpResponse(algo_Data)
+    
+
+def processSleepData(df) :
+    #df = pd.read_csv('./rawData.csv')
+
+    df = pd.DataFrame(df)
+    print(df)
+    print(df.dtypes)
+
+    #df['jsonData'] = df['jsonData'].apply(converStringToDict)
+
+    df['dict_len'] = df['jsonData'].apply(dict_len)
+
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+    df['jsonData'] = df.apply(lambda row: timestampKey(row['timestamp'], row['jsonData'], row['auto_increment_id']), axis=1)
+
+    df_new = pd.DataFrame(columns=['AcX', 'AcY', 'AcZ', 'GyX', 'GyY', 'GyZ', 'Oc2', 'OcV', 'Occ', 'OcV2', 'time', 'id'])
+
+    missing_samples = []  # list to store missing samples for each row
+
+    # loop over each row
+    for index, row in df.iterrows():
+        d= row['jsonData']
+        
+        try :
+            del d['DeviceID']
+        except :
+            pass
+
+        x = []
+        for i in range(len(d) - 1):
+            sample = 'S' + str(len(d) - 1 - i -1)
+            if sample not in d:
+                missing_samples.append(sample)  # add missing sample to list
+                continue
+            d[sample]['id'] = sample
+            x.append(d[sample])
+
+        df = pd.DataFrame(x)
+        frames = [df_new, df]
+        df_new = pd.concat(frames)
+    print("Missing Samples")
+    print(missing_samples)  # print list of missing samples for all rows
+
+    print(df_new)
+
+    jsonapidata = algov2(df_new)
+    #df_new.to_csv('./processedData.csv')
+
+    return jsonapidata
+
+
+def algov2(df) :
+
+    #df = pd.read_csv('./processedData.csv')
+    #df.to_csv('./procssedSleepData.csv')
+
+
+    print("Running the algorithm ...............")
+
+
+    occToggle = 0
+    occThresh = 1.2
+
+    sleep_data = {}
+
+    sample_rate = 250
+
+    df = df[::-1]
+
+    totalTimeHR, totalPoints = totalTime(df)
+
+    print("Adding Magnitude...")
+    df = addMagnitude(df)
+
+
+    print("Computing Bed Occupancy...")
+    df, sample_rate = bedOccData(df, occToggle, occThresh)
+
+
+    print("Hour KPIs Computation...")
+    totalOccPoints, countNegative, countPositive, totalMovingPoints = magArrayProcessing(df['Magnitude'].values, df)
+
+    print("Computing Distribution...")
+    computeDistribution(df)
+
+    print("Converting to proper hours...")
+    kpi = secondstoHours([totalOccPoints, totalMovingPoints, totalOccPoints-totalMovingPoints])
+
+    print("Results...")
+    print("Total Time :", totalTimeHR)
+    print("Occupant Time : ", kpi[0])
+    print("Movement Time : ", kpi[1])
+
+    sleep_data['total_time'] =  totalTimeHR
+    sleep_data['sample_rate'] =  sample_rate
+    sleep_data['bedOccupantTime'] =  kpi[0]
+    sleep_data['awake_time'] =  kpi[1]
+    sleep_data['sleep_time'] =  kpi[2]
+    
+
+    
+
+    if sleep_data['bedOccupantTime'] == "00:00:00" :
+        print("In the if statement of Zero Checks")
+        print("Bed Occupant Time is", sleep_data['bedOccupantTime'])
+        Sleep_info = "Summary Not Available"
+    
+    else :
+        Sleep_info = "Of the" + " " + str(sleep_data['total_time']) + " " "of monitoring :" + "\n" + "Your bed was occupied for" + " " + str(int((totalOccPoints/totalPoints)*100)) + "%" + " " + "of the time." + "\n" + "Your pillow was unoccupied for" + " " + str(int(100- int((totalOccPoints/totalPoints)*100))) +"%"+ " of the time." + "\n" + "You slept restfully for" + " " + str( int(((totalOccPoints-totalMovingPoints)/(totalMovingPoints+(totalOccPoints-totalMovingPoints)))*100) ) + "%" + " of the entire sleep duration."
+    
+    sleep_data['Sleep_info'] = Sleep_info
+
+    print(Sleep_info)
+    # Get from front-end otherwise default as following :
+    rationIndexes = [0.95, 0.9, 0.8, 0.7]
+
+    Sleep_ratio, Sleep_star, Sleep_quality = getSleepRating(totalOccPoints-totalMovingPoints, totalMovingPoints,rationIndexes)
+    
+    print("Sleep Quality Outputs :")
+    print("Sleep Ratio :", Sleep_ratio)
+    print("Sleep Star :", Sleep_star)
+    print("Sleep Quality :", Sleep_quality)
+    
+    sleep_data['Sleep_ratio'] = Sleep_ratio
+    sleep_data['Sleep_star'] = Sleep_star
+    sleep_data['Sleep_quality'] = Sleep_quality
+
+    print("Analysis Complete ...................................")
+    # Find the average magnitude of all rows between 0.7 and 1.0
+    # avg = df.loc[df['Magnitude'].between(0.7, 1.0), 'Magnitude'].mean()
+
+    # # Highlight rows with magnitude outside the range of (avg - 0.3) to (avg + 0.3)
+    # highlight_mask = (df["Magnitude"] < avg - 0.3) | (df["Magnitude"] > avg + 0.3)
+
+    # print(highlight_mask)
+
+    
+
+
+    # df.loc[(df['Magnitude'] <= avg - 0.3) or (df['Magnitude'] >= avg + 0.3), 'highlight_mask'] = 1
+    # df.loc[(df['Magnitude'] >= avg - 0.3) or (df['Magnitude'] <= avg + 0.3), 'highlight_mask'] = 0
+    if EXCEL :
+        df.to_csv('./SleepLabs/Data/withmag.csv')
+
+
+    #highlighted_rows = ColumnDataSource(df.loc[highlight_mask])
+    
+
+    jsonapidata = json.dumps(sleep_data)
+
+    return jsonapidata
+
+
+
+
+def orientation(request) :
+
+    devID = 'F0230003'
+
+    obj= SleepLabOptv1.objects.filter(DevID=devID).order_by('-auto_increment_id')[0]
+
+    data = obj.jsonData
+
+    print(type(obj.jsonData))
+
+    print(data['S239'])
+
+    AcX = data['S239']['AcX']
+    AcY = data['S239']['AcY']
+    AcZ = data['S239']['AcZ']
+
+    if(int(AcX) > int(AcZ) or int(AcY)>int(AcZ)) :
+        orientation = 'Vertical'
+    else :
+        orientation = 'Flat'
+    
+    print("Orientation : ", orientation)
+
+    
+
+    return HttpResponse('ok')
+
+def Devicestatus(request):
+
+    if request.method == "POST":
+        sleep_data = {}
+        jsondata = json.loads(request.body)
+        print(jsondata)
+        latest_datetime = SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-timestamp').first()
+        previous_datetime= datetime.datetime.strptime(latest_datetime.timestamp, '%Y-%m-%d %H:%M:%S.%f') 
+        print('previous_datetime', previous_datetime)
+        present_datetime = datetime.datetime.now()
+        # Calculate the difference between the two dates
+        time_difference = present_datetime - previous_datetime
+
+        data = {}
+
+        # Check if the difference is greater than 1 minute
+        if time_difference < datetime.timedelta(minutes=2):
+            data = {
+                'Device': 'Active',
+            }
+        else:
+             data = {
+                'Device': 'Inactive',
+            }
+        
+        data['lastActive'] = previous_datetime
+
+        obj= SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-auto_increment_id')[0]
+
+        obj_data = obj.jsonData
+
+        print(type(obj.jsonData))
+
+        print(obj_data['S239'])
+
+        AcX = obj_data['S239']['AcX']
+        AcY = obj_data['S239']['AcY']
+        AcZ = obj_data['S239']['AcZ']
+
+        if(abs(int(AcX)) > abs(int(AcZ)) or abs(int(AcY))>abs(int(AcZ))) :
+            orientation = 'Vertical'
+            data['orientation'] = 'Vertical'
+        else :
+            orientation = 'Horizontal'
+            data['orientation'] = 'Horizontal'
+        
+    return JsonResponse(data)
+
+def sleephighligh(request):
+    from bokeh.plotting import figure, show
+    from bokeh.models import ColumnDataSource, DataTable, TableColumn
+    from bokeh.layouts import column
+    import pandas as pd
+
+    data = pd.read_csv('withmag.csv')
+    data['Timestamp'] = pd.to_datetime(data['Timestamp'])
+    data['highlight_mask'].astype(int)
+    df = data
+    print(df)
+
+    source = ColumnDataSource(df)
+    
+    p = figure(plot_width=1320, plot_height=650,title="Magnitude vs Timestamp", x_axis_type='datetime', x_axis_label='Timestamp', y_axis_label='Magnitude')
+
+    # Add the line chart
+    p.line(x='Timestamp', y='Magnitude', source=source, line_width=2)
+
+    # Add a circle glyph for the points where avg == 1
+    p.circle(x='Timestamp', y='Magnitude', source=df[df['highlight_mask'] == 1], fill_color='red', size=8)
+
+    script, div = components(p)
+
+    return render(request, 'sleeplabsgraph.html', {'script': script, 'div': div})
 
 def Sleeplabsgraph(request):
     # Define parameters
@@ -693,125 +653,3 @@ def Sleeplabsgraph(request):
     script, div = components(p)
 
     return render(request, 'sleeplabsgraph.html', {'script': script, 'div': div})
-
-def orientation(request) :
-
-    devID = 'F0230003'
-
-    obj= SleepLabOptv1.objects.filter(DevID=devID).order_by('-auto_increment_id')[0]
-
-    data = obj.jsonData
-
-    print(type(obj.jsonData))
-
-    print(data['S239'])
-
-    AcX = data['S239']['AcX']
-    AcY = data['S239']['AcY']
-    AcZ = data['S239']['AcZ']
-
-    if(int(AcX) > int(AcZ) or int(AcY)>int(AcZ)) :
-        orientation = 'Vertical'
-    else :
-        orientation = 'Flat'
-    
-    print("Orientation : ", orientation)
-
-    
-
-    return HttpResponse('ok')
-
-def Devicestatus(request):
-
-    if request.method == "POST":
-        sleep_data = {}
-        jsondata = json.loads(request.body)
-        print(jsondata)
-        latest_datetime = SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-timestamp').first()
-        previous_datetime= datetime.datetime.strptime(latest_datetime.timestamp, '%Y-%m-%d %H:%M:%S.%f') 
-        print('previous_datetime', previous_datetime)
-        present_datetime = datetime.datetime.now()
-        # Calculate the difference between the two dates
-        time_difference = present_datetime - previous_datetime
-
-        # Check if the difference is greater than 1 minute
-        if time_difference > datetime.timedelta(minutes=1):
-            data = {
-                'Device': 'Not Active',
-            }
-        else:
-            data['Device'] = 'Active'
-        data['lastActive'] = previous_datetime
-
-        obj= SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-auto_increment_id')[0]
-
-        obj_data = obj.jsonData
-
-        print(type(obj.jsonData))
-
-        print(obj_data['S239'])
-
-        AcX = obj_data['S239']['AcX']
-        AcY = obj_data['S239']['AcY']
-        AcZ = obj_data['S239']['AcZ']
-
-        if(int(AcX) > int(AcZ) or int(AcY)>int(AcZ)) :
-            orientation = 'Vertical'
-            data['orientation'] = 'Vertical'
-        else :
-            orientation = 'Horizontal'
-            data['orientation'] = 'Horizontal'
-        
-    return JsonResponse(data)
-
-
-
-def sleephighligh(request):
-    from bokeh.plotting import figure, show
-    from bokeh.models import ColumnDataSource, DataTable, TableColumn
-    from bokeh.layouts import column
-    import pandas as pd
-
-    data = pd.read_csv('withmag.csv')
-    data['Timestamp'] = pd.to_datetime(data['Timestamp'])
-    data['Oc2'].astype(int)
-    df = data
-    #     # create sample data
-    # data = {'magnitude': [2.5, 3.2, 4.1, 3.5, 2.9],
-    #         'timestamp': ['2023-04-26 08:00:00', '2023-04-26 08:01:00', '2023-04-26 08:02:00', '2023-04-26 08:03:00', '2023-04-26 08:04:00'],
-    #         'avg': [0, 1, 0, 1, 0]}
-
-    # # create DataFrame
-    # df = pd.DataFrame(data)
-
-    # display DataFrame
-    print(df)
-
-    source = ColumnDataSource(df)
-
-    p = figure(title="Magnitude vs Timestamp", x_axis_type='datetime', x_axis_label='Timestamp', y_axis_label='Magnitude')
-
-    # Add the line chart
-    p.line(x='Timestamp', y='Magnitude', source=source, line_width=2)
-
-    # Add a circle glyph for the points where avg == 1
-    p.circle(x='Timestamp', y='Magnitude', source=df[df['Oc2'] == 1], fill_color='red', size=8)
-
-
-    # # create figure
-    # p = figure(title="Magnitude vs Timestamp", x_axis_label='Timestamp', y_axis_label='Magnitude')
-
-    # # plot magnitude vs timestamp
-    # p.line(df['Timestamp'], df['Magnitude'], line_width=2)
-
-    # # highlight parts where avg is 1
-    # # p.patch(df[df['Oc2'] == 1]['Timestamp'], df[df['Oc2'] == 1]['Timestamp'], alpha=0.3, color='red')
-    # p.circle(x='Timestamp', y='Magnitude', source=source[df['avg'] == 1], fill_color='red', size=8)
-
-
-    script, div = components(p)
-
-    return render(request, 'sleeplabsgraph.html', {'script': script, 'div': div})
-
-
-
