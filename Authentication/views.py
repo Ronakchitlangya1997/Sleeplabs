@@ -37,3 +37,49 @@ def login(request):
 def logout(request):
 	UserLogout(request)
 	return redirect('login')  
+
+import json
+ 
+from django.http import JsonResponse
+
+
+
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+
+# Assuming 'User' is the model representing your user data
+from .models import User
+
+class CustomJSONEncoder(DjangoJSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, User):
+            return obj.__dict__
+        return super().default(obj)
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def getUserMobileApp(request):
+    if request.method == "POST":
+        jsondata = json.loads(request.body)
+        print("Printing JSON:")
+        print(jsondata)
+        device_id = jsondata.get('DeviceID', None)
+
+        if device_id is not None:
+            try:
+                user = User.objects.get(Device_name=device_id)
+                # Assuming 'User' has fields 'username' and 'email'.
+                # You can modify this based on your actual model fields.
+                user_data = {
+                    "username": user.username,
+                    "email": user.email
+                }
+                return JsonResponse(user_data)
+            except User.DoesNotExist:
+                return JsonResponse({"message": "User not found."}, status=404)
+        else:
+            return JsonResponse({"message": "Invalid JSON data or 'DeviceID' not provided."}, status=400)
+
+    return JsonResponse({"message": "Invalid request method."}, status=405)

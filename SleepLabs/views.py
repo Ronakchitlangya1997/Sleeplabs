@@ -19,7 +19,8 @@ from django.http import JsonResponse
 
 import pandas as pd
 import math
-
+from django.contrib.auth import authenticate, login as UserLogin, logout as UserLogout, update_session_auth_hash
+from django.contrib.auth.models import User
 EXCEL = 1
 
 @login_required(login_url='login')
@@ -95,13 +96,13 @@ def addMagnitude(df):
     return df
 
 def bedOccData (df, occToggle, occThresh) :
-    df['OcV'] = df['OcV'].astype(float)/100
+    df['OcV'] = df['OcV'].astype(float)
 
     # Bed Occupancy Calculations
     sample_rate = 250
     
     if (occToggle == 1) :
-        df = df[df['OcV'].astype(float) < occThresh].reset_index()
+        df = df[df['OcV'].astype(float) > occThresh].reset_index()
     else:
         pass
 
@@ -168,7 +169,8 @@ def secondstoHours(secs):
 
 def computeDistribution(df) :
     sample_rate = 250
-    magBins = [0, 0.5, 0.6, 0.7, 0.8, 0.9, 0.93, 0.94, 0.96, 0.97,1, 1.2, 1.23, 1.26, 1.29, 1.3, 1.4, 1.5, float('inf')]
+    #magBins = [0, 0.5, 0.6, 0.7, 0.8, 0.9, 0.93, 0.94, 0.96, 0.97,1, 1.2, 1.23, 1.26, 1.29, 1.3, 1.4, 1.5, float('inf')]
+    magBins = [0, 0.5, 1, 1.5, 2,2.5, 3, 3.5, float('inf')]
     magCounts = pd.cut(df['Magnitude'], bins=magBins).value_counts()
     
     print("Magnitude Distribution")
@@ -241,7 +243,7 @@ def getSleepRating(sleep_time, awake_time,rationIndexes):
     return sleep_ratio, rating, quality
 
 
-
+@csrf_exempt
 def sleep_labs_graph_api_v3(request):
 
     
@@ -264,6 +266,8 @@ def sleep_labs_graph_api_v3(request):
     if request.method == "POST":
         sleep_data = {}
         jsondata = json.loads(request.body)
+        print("Printing JSON ")
+        print(jsondata)
         date_str_start = jsondata['Date']
         date_str_end = jsondata['Date']
         devEUI = jsondata['devEUI']
@@ -273,10 +277,10 @@ def sleep_labs_graph_api_v3(request):
         print(date_str_start, date_str_end, start_time_str, end_time_str)
 
         #Dummy
-        date_str_start = '2023-05-04'
-        date_str_end = '2023-05-05'
-        start_time_str = '22:00:00'
-        end_time_str = '10:00:00'
+        # date_str_start = '2023-05-04'
+        # date_str_end = '2023-05-05'
+        # start_time_str = '22:00:00'
+        # end_time_str = '10:00:00'
 
         start_datetime_str = date_str_start + ' ' + start_time_str
         end_datetime_str = date_str_end + ' ' + end_time_str
@@ -404,8 +408,8 @@ def algov2(df) :
     print("Running the algorithm ...............")
 
 
-    occToggle = 0
-    occThresh = 1.2
+    occToggle = 1
+    occThresh = 200
 
     sleep_data = {}
 
@@ -452,7 +456,7 @@ def algov2(df) :
         Sleep_info = "Summary Not Available"
     
     else :
-        Sleep_info = "Of the" + " " + str(sleep_data['total_time']) + " " "of monitoring :" + "\n" + "Your bed was occupied for" + " " + str(int((totalOccPoints/totalPoints)*100)) + "%" + " " + "of the time." + "\n" + "Your pillow was unoccupied for" + " " + str(int(100- int((totalOccPoints/totalPoints)*100))) +"%"+ " of the time." + "\n" + "You slept restfully for" + " " + str( int(((totalOccPoints-totalMovingPoints)/(totalMovingPoints+(totalOccPoints-totalMovingPoints)))*100) ) + "%" + " of the entire sleep duration."
+        Sleep_info = "Of the" + " " + str(sleep_data['total_time']) + " " "of monitoring :" + "\n" + "Your pillow was occupied for" + " " + str(int((totalOccPoints/totalPoints)*100)) + "%" + " " + "of the time." + "\n" + "Your pillow was unoccupied for" + " " + str(int(100- int((totalOccPoints/totalPoints)*100))) +"%"+ " of the time." + "\n" + "During the bed occupant hours, you slept restfully for" + " " + str( int(((totalOccPoints-totalMovingPoints)/(totalMovingPoints+(totalOccPoints-totalMovingPoints)))*100) ) + "%" + " of the entire sleep duration."
     
     sleep_data['Sleep_info'] = Sleep_info
 
@@ -526,18 +530,23 @@ def orientation(request) :
 
     return HttpResponse('ok')
 
+@csrf_exempt
 def Devicestatus(request):
+
+    print("In Device Status")
 
     if request.method == "POST":
         sleep_data = {}
         jsondata = json.loads(request.body)
         print(jsondata)
         latest_datetime = SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-timestamp').first()
+        print(latest_datetime)
         previous_datetime= datetime.datetime.strptime(latest_datetime.timestamp, '%Y-%m-%d %H:%M:%S.%f') 
         print('previous_datetime', previous_datetime)
         present_datetime = datetime.datetime.now()
         # Calculate the difference between the two dates
         time_difference = present_datetime - previous_datetime
+
 
         data = {}
 
@@ -550,8 +559,9 @@ def Devicestatus(request):
              data = {
                 'Device': 'Inactive',
             }
-        
-        data['lastActive'] = previous_datetime
+        output_datetime_str = previous_datetime.strftime("%d %b, %I:%M %p")
+        data['lastActive'] = output_datetime_str
+        print(data['lastActive'])
 
         obj= SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-auto_increment_id')[0]
 
@@ -564,6 +574,12 @@ def Devicestatus(request):
         AcX = obj_data['S239']['AcX']
         AcY = obj_data['S239']['AcY']
         AcZ = obj_data['S239']['AcZ']
+        OcV = obj_data['S239']['OcV']
+        # Occupancy Code
+        if int(OcV) > 200 :
+            data['occupancy'] = 'Occupied'
+        else :
+            data['occupancy'] = 'Unoccupied'
 
         if(abs(int(AcX)) > abs(int(AcZ)) or abs(int(AcY))>abs(int(AcZ))) :
             orientation = 'Vertical'
@@ -573,6 +589,75 @@ def Devicestatus(request):
             data['orientation'] = 'Horizontal'
         
     return JsonResponse(data)
+
+
+
+
+@csrf_exempt
+def deviceStatusMobileApp(request):
+
+    if request.method == "GET":
+
+        jsondata = json.loads(request.body)
+        jsondata = jsondata['DeviceID']
+        print("Device ID", jsondata)
+
+        latest_datetime = SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-timestamp').first()
+        print('Latest Datetime', latest_datetime)
+        previous_datetime= datetime.datetime.strptime(latest_datetime.timestamp, '%Y-%m-%d %H:%M:%S.%f') 
+        print('Previous Datetime', previous_datetime)
+        present_datetime = datetime.datetime.now()
+
+        # Calculate the difference between the two dates
+        time_difference = present_datetime - previous_datetime
+
+
+        data = {}
+
+        # Check if the difference is greater than 1 minute
+        if time_difference < datetime.timedelta(minutes=2):
+            data = {
+                'status': 'Active',
+            }
+        else:
+             data = {
+                'status': 'Inactive',
+            }
+        output_datetime_str = previous_datetime.strftime("%d %b, %I:%M %p")
+        data['lastActive'] = output_datetime_str
+        print('Last Active Timestamp', data['lastActive'])
+
+        obj= SleepLabOptv1.objects.filter(DevID=jsondata).order_by('-auto_increment_id')[0]
+
+        obj_data = obj.jsonData
+
+
+        AcX = obj_data['S239']['AcX']
+        AcY = obj_data['S239']['AcY']
+        AcZ = obj_data['S239']['AcZ']
+        OcV = obj_data['S239']['OcV']
+        # Occupancy Code
+        if int(OcV) > 200 :
+            data['occupancy'] = 'Occupied'
+        else :
+            data['occupancy'] = 'Unoccupied'
+
+        if(abs(int(AcX)) > abs(int(AcZ)) or abs(int(AcY))>abs(int(AcZ))) :
+            orientation = 'Vertical'
+            data['orientation'] = 'Vertical'
+        else :
+            orientation = 'Horizontal'
+            data['orientation'] = 'Horizontal'
+    
+    print("Device Status Response :", data)
+
+    return JsonResponse(data)
+
+
+
+
+
+
 
 def sleephighligh(request):
     from bokeh.plotting import figure, show
@@ -653,3 +738,4 @@ def Sleeplabsgraph(request):
     script, div = components(p)
 
     return render(request, 'sleeplabsgraph.html', {'script': script, 'div': div})
+

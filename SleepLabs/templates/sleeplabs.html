@@ -568,6 +568,24 @@ tr:nth-child(odd) {
 		</div>
 		<div class="dashboardleadsinfoboxline"></div>
 	</div>
+	<div id="Unassignedleads" class="Dashboarddata dashboardleadsinfobox">
+		<h5 class="dashboardleadsinfoboxheading">Occupancy</h5>
+		<div class="d-flex flex-row gap-4 ml-4 mt-2">
+		  <!-- <div style="width: 56px; height: 56px;">
+			  <img src="https://nps-storage.s3.ap-south-1.amazonaws.com/images/Card+Icon.png" alt="">
+		  </div> -->
+		  <div class="dashboardcircle">
+			  <!-- <span class="material-symbols-outlined dashboardicon">
+				  sleep
+				  </span> -->
+				  <span class="material-symbols-sharp dashboardicon">
+					  flip
+					  </span>
+		  </div>
+		  <h4 class="dashboardleadsinfovalue counterclass" id='Occupancyvalue'  style="font-size: 26px;">Unoccupied</h4>
+		  </div>
+		  <div class="dashboardleadsinfoboxline"></div>
+	  </div>
 </div>
 
 <button id="detailsgarphbtn"><a id="graphbtntag" href="/sleepAnalytics/">Details</a></button>
@@ -869,10 +887,12 @@ tr:nth-child(odd) {
 	  .then(response => response.json())
 	  .then(data => {
 		console.log(data);
-		data1 = new Date(data.lastActive)
+		//data1 = new Date(data.lastActive)
+		console.log(data.lastActive)
 		document.getElementById('devicestatusalue').innerHTML = data.Device
-		document.getElementById('lastactivevalue').innerHTML = data1.toLocaleString();
+		document.getElementById('lastactivevalue').innerHTML = data.lastActive;
 		document.getElementById('Orientationvalue').innerHTML = data.orientation;
+		document.getElementById('Occupancyvalue').innerHTML = data.occupancy;
 	  })
 </script>
   

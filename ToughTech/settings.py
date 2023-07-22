@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'Authentication.apps.AuthenticationConfig',
     'rest_framework',
     'corsheaders'
+
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
