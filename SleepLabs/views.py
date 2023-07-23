@@ -596,7 +596,7 @@ def Devicestatus(request):
 @csrf_exempt
 def deviceStatusMobileApp(request):
 
-    if request.method == "GET":
+    if request.method == "POST":
 
         jsondata = json.loads(request.body)
         jsondata = jsondata['DeviceID']
