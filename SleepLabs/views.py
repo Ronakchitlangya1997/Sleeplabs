@@ -176,7 +176,8 @@ def computeDistribution(df) :
     print("Magnitude Distribution")
     print(magCounts.sort_index())
     print(type(magCounts.sort_index()))
-    magCounts.sort_index().to_excel('./SleepLabs/Data/magnitudeDistribution.xlsx')
+    if EXCEL :
+        magCounts.sort_index().to_excel('./SleepLabs/Data/magnitudeDistribution.xlsx')
 
 
     # Orientation
@@ -204,7 +205,8 @@ def computeDistribution(df) :
     print("occV Distribution")
     print(occVCounts.sort_index())    
 
-    occVCounts.sort_index().to_excel('./SleepLabs/Data/voltageDistribution.xlsx')
+    if EXCEL :
+        occVCounts.sort_index().to_excel('./SleepLabs/Data/voltageDistribution.xlsx')
 
 def totalTime (df) :
     sample_rate = 250
@@ -301,8 +303,9 @@ def sleep_labs_graph_api_v3(request):
         hourly_counts = df_2.resample('H').count()
         print(hourly_counts)
         print(type(hourly_counts))
-        hourly_counts.to_excel('./SleepLabs/Data/rawPSRDistribution.xlsx')
+        
         if EXCEL :
+            hourly_counts.to_excel('./SleepLabs/Data/rawPSRDistribution.xlsx')
             df.to_excel('./SleepLabs/Data/rawData.xlsx')
 
         # ***************************** DUMMY ****************************** #
@@ -329,7 +332,8 @@ def sleep_labs_graph_api_v3(request):
         print(hourly_counts)
         print(type(hourly_counts))
 
-        hourly_counts.to_excel('./SleepLabs/Data/extrapolatedPSRDistribution.xlsx')
+        if EXCEL :
+            hourly_counts.to_excel('./SleepLabs/Data/extrapolatedPSRDistribution.xlsx')
         #df.to_excel('./SleepLabs/Data/extrapolatedData.xlsx')
 
 
