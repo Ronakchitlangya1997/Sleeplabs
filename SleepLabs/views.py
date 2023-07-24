@@ -21,7 +21,7 @@ import pandas as pd
 import math
 from django.contrib.auth import authenticate, login as UserLogin, logout as UserLogout, update_session_auth_hash
 from django.contrib.auth.models import User
-EXCEL = 1
+EXCEL = 0
 
 @login_required(login_url='login')
 def home(request):
