@@ -245,6 +245,24 @@ def getSleepRating(sleep_time, awake_time,rationIndexes):
     return sleep_ratio, rating, quality
 
 
+def format_date(date_str):
+    # Split the date string into year, month, and day components
+    year, month, day = date_str.split('-')
+
+    # Add leading zeros to month and day if they have a single digit
+    month = month.zfill(2)
+    day = day.zfill(2)
+
+    # Join the components back together with hyphens
+    formatted_date = f"{year}-{month}-{day}"
+
+    return formatted_date
+
+def format_time_component(time_component):
+    # Add leading zero if the time component has a single digit
+    return time_component.zfill(2)
+
+
 @csrf_exempt
 def sleep_labs_graph_api_v3(request):
 
@@ -271,11 +289,45 @@ def sleep_labs_graph_api_v3(request):
         print("Printing JSON ")
         print(jsondata)
         date_str_start = jsondata['Date']
-        date_str_end = jsondata['Date']
-        devEUI = jsondata['devEUI']
-        start_time_str = jsondata['StartTimehours']+":"+jsondata['StartTimemin']+":"+jsondata['StartTimesec']
-        end_time_str = jsondata['EndTimehours']+":"+jsondata['EndTimemin']+":"+jsondata['EndTimesec']
 
+        date_str_start = format_date(date_str_start)
+
+        date_str_end = jsondata['Date']
+
+        date_str_end = date_str_start
+
+        devEUI = jsondata['devEUI']
+
+        start_time_hours = jsondata['StartTimehours']
+        start_time_minutes = jsondata['StartTimemin']
+        start_time_seconds = jsondata['StartTimesec']
+        # start_time_str = jsondata['StartTimehours']+":"+jsondata['StartTimemin']+":"+jsondata['StartTimesec']
+
+        # Format hours, minutes, and seconds components with leading zeros
+        formatted_hours = format_time_component(start_time_hours)
+        formatted_minutes = format_time_component(start_time_minutes)
+        formatted_seconds = format_time_component(start_time_seconds)
+
+        # Create the formatted time string with colons
+        start_time_str = f"{formatted_hours}:{formatted_minutes}:{formatted_seconds}"
+
+        
+
+        # Assuming jsondata contains the values for EndTimehours, EndTimemin, and EndTimesec
+        end_time_hours = jsondata['EndTimehours']
+        end_time_minutes = jsondata['EndTimemin']
+        end_time_seconds = jsondata['EndTimesec']
+
+        # Format hours, minutes, and seconds components with leading zeros
+        formatted_hours = format_time_component(end_time_hours)
+        formatted_minutes = format_time_component(end_time_minutes)
+        formatted_seconds = format_time_component(end_time_seconds)
+
+        # Create the formatted time string with colons
+        end_time_str = f"{formatted_hours}:{formatted_minutes}:{formatted_seconds}"
+
+
+        print("Queried Dates")
         print(date_str_start, date_str_end, start_time_str, end_time_str)
 
         #Dummy
