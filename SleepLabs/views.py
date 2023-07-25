@@ -352,7 +352,7 @@ def sleep_labs_graph_api_v3(request):
         
         df_2.index = pd.to_datetime(df_2.index)
 
-        hourly_counts = df_2.resample('H').count()
+        hourly_counts = df_2.resample('30S').count()
         print(hourly_counts)
         print(type(hourly_counts))
         
@@ -366,8 +366,10 @@ def sleep_labs_graph_api_v3(request):
         # set timestamp column as index
         df.set_index('timestamp', inplace=True)
 
+        print("What's going on?")
+        print(df)
         # resample to one minute interval and fill missing values with the previous row
-        df_resampled = df.resample('1T').ffill()
+        df_resampled = df.resample('30S').ffill()
 
         # reset index
         df_resampled.reset_index(inplace=True)
@@ -386,6 +388,7 @@ def sleep_labs_graph_api_v3(request):
 
         if EXCEL :
             hourly_counts.to_excel('./SleepLabs/Data/extrapolatedPSRDistribution.xlsx')
+            df.to_excel('./SleepLabs/Data/RawDataAfterSampling.xlsx')
         #df.to_excel('./SleepLabs/Data/extrapolatedData.xlsx')
 
 
@@ -569,11 +572,11 @@ def orientation(request) :
 
     print(type(obj.jsonData))
 
-    print(data['S239'])
+    print(data['S119'])
 
-    AcX = data['S239']['AcX']
-    AcY = data['S239']['AcY']
-    AcZ = data['S239']['AcZ']
+    AcX = data['S119']['AcX']
+    AcY = data['S119']['AcY']
+    AcZ = data['S119']['AcZ']
 
     if(int(AcX) > int(AcZ) or int(AcY)>int(AcZ)) :
         orientation = 'Vertical'
@@ -625,12 +628,12 @@ def Devicestatus(request):
 
         print(type(obj.jsonData))
 
-        print(obj_data['S239'])
+        print(obj_data['S119'])
 
-        AcX = obj_data['S239']['AcX']
-        AcY = obj_data['S239']['AcY']
-        AcZ = obj_data['S239']['AcZ']
-        OcV = obj_data['S239']['OcV']
+        AcX = obj_data['S119']['AcX']
+        AcY = obj_data['S119']['AcY']
+        AcZ = obj_data['S119']['AcZ']
+        OcV = obj_data['S119']['OcV']
         # Occupancy Code
         if int(OcV) > 200 :
             data['occupancy'] = 'Occupied'
@@ -688,10 +691,10 @@ def deviceStatusMobileApp(request):
         obj_data = obj.jsonData
 
 
-        AcX = obj_data['S239']['AcX']
-        AcY = obj_data['S239']['AcY']
-        AcZ = obj_data['S239']['AcZ']
-        OcV = obj_data['S239']['OcV']
+        AcX = obj_data['S119']['AcX']
+        AcY = obj_data['S119']['AcY']
+        AcZ = obj_data['S119']['AcZ']
+        OcV = obj_data['S119']['OcV']
         # Occupancy Code
         if int(OcV) > 200 :
             data['occupancy'] = 'Occupied'
