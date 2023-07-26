@@ -468,7 +468,7 @@ def algov2(df) :
 
 
     occToggle = 1
-    occThresh = 200
+    occThresh = 300
 
     sleep_data = {}
 
@@ -635,7 +635,7 @@ def Devicestatus(request):
         AcZ = obj_data['S119']['AcZ']
         OcV = obj_data['S119']['OcV']
         # Occupancy Code
-        if int(OcV) > 200 :
+        if int(OcV) > 300 :
             data['occupancy'] = 'Occupied'
         else :
             data['occupancy'] = 'Unoccupied'
