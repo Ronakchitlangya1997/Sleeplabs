@@ -635,6 +635,9 @@ def Devicestatus(request):
         AcZ = obj_data['S119']['AcZ']
         OcV = obj_data['S119']['OcV']
         # Occupancy Code
+        print("Printing OcV")
+        print(OcV)
+        print(int(OcV) > 300)
         if int(OcV) > 300 :
             data['occupancy'] = 'Occupied'
         else :
